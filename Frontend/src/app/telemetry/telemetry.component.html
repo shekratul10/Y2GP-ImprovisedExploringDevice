@@ -1,0 +1,19 @@
+<h2>Telemetry</h2>
+<div *ngIf="!dataService.LoS">
+    <ul>
+        <li>
+            X: {{telemetry.pos.x}}
+            Y: {{telemetry.pos.y}}
+        </li>
+        <li>
+            Angle: {{telemetry.angle}}
+        </li>
+        <li>
+            Speed: {{telemetry.speed}}
+        </li>
+    </ul>
+</div>
+<div *ngIf="dataService.LoS">
+    <h3>LoS</h3>
+    <p>NO SIGNAL</p>
+</div>
