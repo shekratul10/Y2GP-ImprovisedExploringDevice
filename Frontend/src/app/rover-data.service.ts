@@ -9,10 +9,12 @@ export class RoverDataService {
 
   constructor(private http:HttpClient) { }
 
-  // Local telemetry store
+  // Local telemetry and map store
   private telemetry:Telemetry = {pos:{x:0,y:0},angle:0,speed:0};
+  private map:RoverMap = {map:[]};
+  //LoS is loss of signal, to be set if there is either a server timeout or data is too old
   LoS:boolean = true;
-  auth_code:number = 0;
+  auth_token:string = "";
 
   // Auto update boolean to be enabled or disabled from the interface
   private _autoUpdate:boolean = false;
@@ -21,7 +23,7 @@ export class RoverDataService {
   }
   public set autoUpdate(val:Boolean){
     // Sets a timeout for the function at the refresh time
-    if(val) this.updateTimeout = setTimeout(this.updateTelemetry, this.updateRefreshTime);
+    if(val) this.updateTimeout = setTimeout(this.updateData, this.updateRefreshTime);
     // Clear the timeout if disabling
     else clearTimeout(this.updateTimeout);
   }
@@ -29,26 +31,47 @@ export class RoverDataService {
   private updateTimeout:NodeJS.Timeout = undefined as unknown as NodeJS.Timeout;
   private updateRefreshTime:number = 250;
 
-
   public getTelemetry(){
     return this.telemetry;
   }
 
-  //Public facing event to trigger a refresh every time the telemetry changes
-  public telemetryUpdate = new EventEmitter();
-
-  private getTelemetryFromServer(){
-    return this.http.post<Telemetry>(`{environment.apiBaseUrl}/api/telemetry`,this.auth_code)
+  public getMap(){
+    return this.map;
   }
 
-  private updateTelemetry(){
+  //Public facing event to trigger a refresh on the DOM every time the telemetry or map changes
+  public telemetryUpdate = new EventEmitter();
+  public roverMapUpdate = new EventEmitter();
+
+  private getTelemetryFromServer(){
+    return this.http.get<Telemetry>(`{environment.apiBaseUrl}/api/telemetry`,{params:{auth_code:this.auth_token}})
+  }
+
+  private getRoverMapFromServer(){
+    return this.http.get<RoverMap>(`{environment.apiBaseUrl}/api/map`,{params:{auth_code:this.auth_token}})
+  }
+
+
+  //TODO: Might separate these into independent auto updaters
+  private updateData(){
     this.getTelemetryFromServer()
       .subscribe((data:Telemetry) => {
         this.telemetry = data; 
         this.telemetryUpdate.emit()
-      })
+      });
+    this.getRoverMapFromServer()
+      .subscribe((data:RoverMap) => {
+        this.map = data;
+        this.roverMapUpdate.emit()
+      });
   }
 
+}
+
+
+//TODO: Figure out an actual data type for the map (probably a 2d array)
+export type RoverMap = {
+  map:number[][];
 }
 
 export type Position = {
@@ -58,7 +81,6 @@ export type Position = {
 
 export interface Telemetry{
   pos:Position;
-  angle:number;
+  angle:number; //Maybe angle is included in pos?
   speed:number;
-  
 }

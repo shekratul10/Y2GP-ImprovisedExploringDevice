@@ -8,16 +8,17 @@ import { RoverDataService, Telemetry } from '../rover-data.service';
 })
 export class TelemetryComponent implements OnInit {
 
-  constructor(public dataService:RoverDataService) { }
+  constructor(public roverData:RoverDataService) { }
 
-  telemetry:Telemetry = this.dataService.getTelemetry();
+  telemetry:Telemetry = this.roverData.getTelemetry();
 
   ngOnInit(): void {
-    this.dataService.telemetryUpdate.subscribe(() => this.updateTelemetry())
+    //Subscribe to the event emitter to update the telemetry display
+    this.roverData.telemetryUpdate.subscribe(() => this.updateTelemetry())
   }
 
   updateTelemetry(){
-    this.telemetry = this.dataService.getTelemetry();
+    this.telemetry = this.roverData.getTelemetry();
   }
 
 }
