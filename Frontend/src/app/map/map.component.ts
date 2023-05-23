@@ -35,5 +35,4 @@ export class MapComponent implements OnInit {
     throw new Error('Method not implemented.');
   }
 
-  
 }
