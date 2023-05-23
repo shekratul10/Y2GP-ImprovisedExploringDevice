@@ -8,7 +8,7 @@
     "build:ci": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadlessPuppeteer"
   },
   "private": true,
   "dependencies": {
