@@ -1,0 +1,3 @@
+sudo journalctl -u pybackend.service
+
+#ubuntu command so view log of pybackend.service
