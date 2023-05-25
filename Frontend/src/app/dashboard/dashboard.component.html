@@ -1,16 +1,11 @@
-<h1>Improvised Exploring Device Dashboard</h1>
-
-<ul class="dashboard-elements">
-    <li>
-        <div>
-            <app-map></app-map>
-        </div>
-    </li>
-    <li>
-        <div>
-            <app-telemetry></app-telemetry>
-            <app-control-panel></app-control-panel>
-        </div>
-    </li>
-</ul>
-
+<mat-grid-list cols="2" rowHeight="300px">
+    <mat-grid-tile [rowspan]="2">
+        <app-map></app-map>
+    </mat-grid-tile>
+    <mat-grid-tile>
+        <app-telemetry></app-telemetry>
+    </mat-grid-tile>
+    <mat-grid-tile>
+        <app-control-panel></app-control-panel>
+    </mat-grid-tile>
+</mat-grid-list>
