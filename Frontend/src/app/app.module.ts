@@ -5,7 +5,10 @@ import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TelemetryComponent } from './telemetry/telemetry.component';
 import { MapComponent } from './map/map.component';
-import {HttpClientModule} from '@angular/common/http'
+import {HttpClientModule} from '@angular/common/http';
+import { ControlPanelComponent } from './control-panel/control-panel.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatButtonModule } from '@angular/material/button';
 
 const routes: Routes = [
   {path:'', component:DashboardComponent}
@@ -16,12 +19,15 @@ const routes: Routes = [
     AppComponent,
     DashboardComponent,
     TelemetryComponent,
-    MapComponent
+    MapComponent,
+    ControlPanelComponent,
   ],
   imports: [
     BrowserModule,
     RouterModule.forRoot(routes),
-    HttpClientModule
+    HttpClientModule,
+    BrowserAnimationsModule,
+    MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

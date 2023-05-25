@@ -10,7 +10,7 @@ export class RoverDataService {
   constructor(private http:HttpClient) { }
 
   // Local telemetry and map store
-  private telemetry:Telemetry = {pos:{x:0,y:0},angle:0,speed:0};
+  private telemetry:Telemetry = {pos:{x:0,y:0},angle:0,speed:0, state:"stop"};
   private map:RoverMap = {map:[]};
   //LoS is loss of signal, to be set if there is either a server timeout or data is too old
   LoS:boolean = true;
@@ -51,6 +51,9 @@ export class RoverDataService {
     return this.http.get<RoverMap>(`{environment.apiBaseUrl}/api/map`,{params:{auth_code:this.auth_token}})
   }
 
+  public sendCommand(com:Command){
+    this.http.put(`{environment.apiBaseUrl}/api/cmd`, com,{params:{auth_code:this.auth_token}});
+  }
 
   //TODO: Might separate these into independent auto updaters
   private updateData(){
@@ -78,8 +81,11 @@ export type Position = {
   y:number;
 }
 
+export type Command = "start" | "stop";
+
 export interface Telemetry{
   pos:Position;
   angle:number; //Maybe angle is included in pos?
   speed:number;
+  state:"start"|"stop"|"mapping"|"solving" //TODO: make this useful
 }

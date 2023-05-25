@@ -24,6 +24,7 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.roverData.roverMapUpdate.subscribe(() => this.updateMap())
     this.two.renderer.domElement.style.background = '#fcf3d1';
+    this.two.renderer.setSize(200,200);
   }
 
   updateMap(): void {
