@@ -10,9 +10,24 @@ export class RoverDataService {
   constructor(private http:HttpClient) { }
 
   // Local telemetry and map store
-  private telemetry:Telemetry = {pos:{x:0,y:0},angle:0,speed:0, state:"stop"};
-  private map:RoverMap = {map:[]};
-  //LoS is loss of signal, to be set if there is either a server timeout or data is too old
+  private telemetry:Telemetry = {id:0,pos:{x:0,y:0},tilt:[],speed:0, state:"stop"};
+  private map: RoverMap = {
+    map: [
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+    ]
+  }; //TODO: Remove the test data
+  
+  
+//LoS is loss of signal, to be set if there is either a server timeout or data is too old
   LoS:boolean = true;
   auth_token:string = "";
 
@@ -44,15 +59,15 @@ export class RoverDataService {
   public roverMapUpdate = new EventEmitter();
 
   private getTelemetryFromServer(){
-    return this.http.get<Telemetry>(`{environment.apiBaseUrl}/api/telemetry`,{params:{auth_code:this.auth_token}})
+    return this.http.get<Telemetry>(`${environment.apiBaseUrl}/api/telemetry`);//{params:{auth_code:this.auth_token}})
   }
 
   private getRoverMapFromServer(){
-    return this.http.get<RoverMap>(`{environment.apiBaseUrl}/api/map`,{params:{auth_code:this.auth_token}})
+    return this.http.get<RoverMap>(`${environment.apiBaseUrl}/api/map`);//,{params:{auth_code:this.auth_token}})
   }
 
   public sendCommand(com:Command){
-    this.http.put(`{environment.apiBaseUrl}/api/cmd`, com,{params:{auth_code:this.auth_token}});
+    this.http.post(`${environment.apiBaseUrl}/api/cmd`, com);//,{params:{auth_code:this.auth_token}});
   }
 
   //TODO: Might separate these into independent auto updaters
@@ -84,8 +99,9 @@ export type Position = {
 export type Command = "start" | "stop";
 
 export interface Telemetry{
+  id:number;
+  tilt:number[];
   pos:Position;
-  angle:number; //Maybe angle is included in pos?
   speed:number;
-  state:"start"|"stop"|"mapping"|"solving" //TODO: make this useful
+  state:"start"|"stop"|"mapping"|"solving"|"error" //TODO: make this useful
 }
