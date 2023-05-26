@@ -15,8 +15,9 @@ export class MenubarComponent implements OnInit {
 
   ngOnInit(): void {
     this.router.events.subscribe((val) => {
-      let v = val as RouterEvent;
-      switch(v.url){
+      //get current router route
+      let v = this.router.url
+      switch(v){
         case "/dashboard":
           this.colours.dash = "primary";
           this.colours.cons = "";
@@ -24,6 +25,10 @@ export class MenubarComponent implements OnInit {
         case "/console":
           this.colours.dash = "";
           this.colours.cons = "primary";
+          break;
+        default:
+          this.colours.dash = "";
+          this.colours.cons = "";
           break;
       }
     });

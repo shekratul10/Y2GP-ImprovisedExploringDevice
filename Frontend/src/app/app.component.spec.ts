@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterOutlet } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing'
 

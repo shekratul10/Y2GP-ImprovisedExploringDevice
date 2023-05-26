@@ -45,7 +45,6 @@ const routes: Routes = [
     MatToolbarModule,
     MatButtonToggleModule,
     MatSnackBarModule,
-    NoopAnimationsModule,
     MatCardModule
   ],
   providers: [
