@@ -1,0 +1,6 @@
+<mat-card>
+    <mat-card-header><h1>Console Log</h1></mat-card-header>
+    <div *ngFor="let entry of log.text; index as i;">
+        <p [ngClass]="entry.level">{{entry.timestamp.toLocaleTimeString('en-GB')}} {{entry.level.toUpperCase()}}: {{entry.message}}</p>
+    </div>
+</mat-card>
