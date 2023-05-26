@@ -13,12 +13,15 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatToolbarModule} from '@angular/material/toolbar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MatCardModule} from '@angular/material/card'
 import { FrontpageComponent } from './frontpage/frontpage.component';
 import { MenubarComponent } from './menubar/menubar.component';
+import { ConsoleComponent } from './console/console.component';
 
 const routes: Routes = [
   {path:'', component:FrontpageComponent},
-  {path:'dashboard', component:DashboardComponent}
+  {path:'dashboard', component:DashboardComponent},
+  {path:'console', component:ConsoleComponent},
 ];
 
 @NgModule({
@@ -30,6 +33,7 @@ const routes: Routes = [
     ControlPanelComponent,
     FrontpageComponent,
     MenubarComponent,
+    ConsoleComponent,
   ],
   imports: [
     BrowserModule,
@@ -41,7 +45,8 @@ const routes: Routes = [
     MatToolbarModule,
     MatButtonToggleModule,
     MatSnackBarModule,
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    MatCardModule
   ],
   providers: [
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 2500}}

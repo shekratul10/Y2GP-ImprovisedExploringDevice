@@ -23,7 +23,7 @@ export class MapComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.two.appendTo(this.domElement.nativeElement);
+    this.two.appendTo(this.domElement.nativeElement.querySelector('div.map'));
     this.roverData.roverMapUpdate.subscribe(() => this.updateMap())
     this.two.renderer.setSize(this.displaySize.x,this.displaySize.y);
     this.render();

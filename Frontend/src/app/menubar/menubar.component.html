@@ -1,5 +1,7 @@
 <mat-toolbar box>
-    <a href="/">{{title}}</a>
+    <a [routerLink]="['/']">{{title}}</a>
     <span class="spacer"></span>
-    <a mat-flat-button [color]="colours.dash" href="/dashboard">Dashboard</a>
+    <a mat-flat-button [color]="colours.dash" [routerLink]="['/dashboard']" >Dashboard</a>
+    <span class="spacer"></span>
+    <a mat-flat-button [color]="colours.cons" [routerLink]="['/console']">Console</a>
 </mat-toolbar>
