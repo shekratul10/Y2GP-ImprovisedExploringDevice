@@ -4,8 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --base-href=/static",
-    "build:prod": "ng build --configuration production --base-href=/static",
+    "build": "ng build --base-href=static/",
+    "build:prod": "ng build --configuration production --base-href=/static/",
     "build:ci": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
