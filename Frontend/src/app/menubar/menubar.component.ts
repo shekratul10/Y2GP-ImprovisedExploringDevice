@@ -8,7 +8,8 @@ import { Router, RouterEvent } from '@angular/router';
 })
 export class MenubarComponent implements OnInit {
 
-  colours = {dash:""}
+  colours = {dash:""};
+  title = "Improvised Exploring Device";
 
   constructor(private router:Router) { }
 

@@ -7,11 +7,12 @@ import { TelemetryComponent } from './telemetry/telemetry.component';
 import { MapComponent } from './map/map.component';
 import {HttpClientModule} from '@angular/common/http';
 import { ControlPanelComponent } from './control-panel/control-panel.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatToolbarModule} from '@angular/material/toolbar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { FrontpageComponent } from './frontpage/frontpage.component';
 import { MenubarComponent } from './menubar/menubar.component';
 
@@ -38,9 +39,13 @@ const routes: Routes = [
     MatButtonModule,
     MatGridListModule,
     MatToolbarModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatSnackBarModule,
+    NoopAnimationsModule
   ],
-  providers: [],
+  providers: [
+    {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 2500}}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
