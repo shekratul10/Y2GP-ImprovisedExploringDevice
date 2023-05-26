@@ -1,7 +1,22 @@
 *{
     text-align: center;
+    pad:5px;
 }
-ul > li {
-    display:inline-block;
-    padding:30px;
+
+.dashboard-elements{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: #f2f2f2;
+}
+
+h1{
+    padding-top: 10px;
+    font-style: bold;
 }

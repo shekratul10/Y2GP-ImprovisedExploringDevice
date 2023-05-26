@@ -1,1 +1,4 @@
-<router-outlet></router-outlet>
+<app-menubar></app-menubar>
+<main role="main" [@fadeAnimation]="outlet.isActivated ? outlet.activatedRoute : ''">
+    <router-outlet #outlet="outlet"></router-outlet>
+</main>
