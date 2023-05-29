@@ -1,4 +1,4 @@
-from pybackend import app
+from pybackend import app, db
 
 if __name__ == "__main__":
 	app.run()

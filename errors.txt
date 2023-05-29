@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/arbiter.py", line 589, in spawn_worker
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     worker.init_process()
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/workers/base.py", line 134, in init_process
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     self.load_wsgi()
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     self.wsgi = self.app.wsgi()
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/app/base.py", line 67, in wsgi
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     self.callable = self.load()
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     return self.load_wsgiapp()
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     return util.import_app(self.app_uri)
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/util.py", line 359, in import_app
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     mod = importlib.import_module(module)
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     return _bootstrap._gcd_import(name[level:], package, level)
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/app.py", line 1, in <module>
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     from pybackend import app
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/pybackend/__init__.py", line 11, in <module>
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     from pybackend import routes
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/pybackend/routes.py", line 3, in <module>
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     from pybackend.models import Map, Rover, Path
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:   File "/home/ubuntu/pybackend/pybackend/models.py", line 6
+May 29 12:13:58 ip-172-31-40-185 gunicorn[1511]:     map_array = db.Column(db.String(1000), nullable=False, default=)

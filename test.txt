@@ -1,3 +1,41 @@
 sudo journalctl -u pybackend.service
 
 #ubuntu command so view log of pybackend.service
+
+Traceback (most recent call last):
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/arbiter.py", line 589, in spawn_worker
+     worker.init_process()
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/workers/base.py", line 134, in init_process
+     self.load_wsgi()
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+     self.wsgi = self.app.wsgi()
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/app/base.py", line 67, in wsgi
+     self.callable = self.load()
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+    return self.load_wsgiapp()
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+     return util.import_app(self.app_uri)
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/gunicorn/util.py", line 359, in import_app
+     mod = importlib.import_module(module)
+   File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+     return _bootstrap._gcd_import(name[level:], package, level)
+   File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+   File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+   File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+   File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+   File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+   File "/home/ubuntu/pybackend/app.py", line 1, in <module>
+     from pybackend import app
+   File "/home/ubuntu/pybackend/pybackend/__init__.py", line 11, in <module>
+     from pybackend import routes
+   File "/home/ubuntu/pybackend/pybackend/routes.py", line 51, in <module>
+     def storeTelemetry():
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/flask/scaffold.py", line 436, in decorator
+     self.add_url_rule(rule, endpoint, f, **options)
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/flask/scaffold.py", line 51, in wrapper_func
+     return f(self, *args, **kwargs)
+   File "/home/ubuntu/pybackend/venv/lib/python3.10/site-packages/flask/app.py", line 1059, in add_url_rule
+     raise AssertionError(
+ AssertionError: View function mapping is overwriting an existing endpoint function: storeTelemetry
+
