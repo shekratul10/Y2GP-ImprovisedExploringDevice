@@ -5,9 +5,19 @@
             <p>X: {{telemetry.pos.x}}</p>
             <p>Y: {{telemetry.pos.y}}</p>
         </li>
+        <h3>Accelerometer:</h3>
         <li>
-            <p>Speed: {{telemetry.speed}}</p>
+            <p>X: {{telemetry.accel.x}}</p>
+            <p>Y: {{telemetry.accel.y}}</p>
+            <p>Z: {{telemetry.accel.z}}</p>
         </li>
+        <h3>Gyro:</h3>
+        <li>
+            <p>X: {{telemetry.gyro.x}}</p>
+            <p>Y: {{telemetry.gyro.y}}</p>
+            <p>Z: {{telemetry.gyro.z}}</p>
+        </li>
+        
     </ul>
 </div>
 <div *ngIf="roverData.LoS">

@@ -5,9 +5,9 @@ import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TelemetryComponent } from './telemetry/telemetry.component';
 import { MapComponent } from './map/map.component';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClientJsonpModule, HttpClientModule} from '@angular/common/http';
 import { ControlPanelComponent } from './control-panel/control-panel.component';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatToolbarModule} from '@angular/material/toolbar';
@@ -17,23 +17,20 @@ import { MatCardModule} from '@angular/material/card'
 import { FrontpageComponent } from './frontpage/frontpage.component';
 import { MenubarComponent } from './menubar/menubar.component';
 import { ConsoleComponent } from './console/console.component';
+import { RoverViewportComponent } from './rover-viewport/rover-viewport.component';
 
 const routes: Routes = [
   {path:'', component:FrontpageComponent},
-  {path:'dashboard', component:DashboardComponent},
   {path:'console', component:ConsoleComponent},
+  { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) },
 ];
 
 @NgModule({
   declarations: [
     AppComponent,
-    DashboardComponent,
-    TelemetryComponent,
-    MapComponent,
-    ControlPanelComponent,
     FrontpageComponent,
     MenubarComponent,
-    ConsoleComponent,
+    ConsoleComponent
   ],
   imports: [
     BrowserModule,
@@ -41,11 +38,11 @@ const routes: Routes = [
     HttpClientModule,
     BrowserAnimationsModule,
     MatButtonModule,
-    MatGridListModule,
     MatToolbarModule,
     MatButtonToggleModule,
     MatSnackBarModule,
-    MatCardModule
+    MatCardModule,
+    HttpClientJsonpModule
   ],
   providers: [
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 2500}}

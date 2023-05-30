@@ -15,6 +15,7 @@ export class TelemetryComponent implements OnInit {
   ngOnInit(): void {
     //Subscribe to the event emitter to update the telemetry display
     this.roverData.telemetryUpdate.subscribe(() => this.updateTelemetry())
+    this.roverData.autoUpdate=true;
   }
 
   updateTelemetry(){

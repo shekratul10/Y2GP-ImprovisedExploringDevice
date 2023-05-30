@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { TelemetryComponent } from '../telemetry/telemetry.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,7 +8,6 @@ import { TelemetryComponent } from '../telemetry/telemetry.component';
 export class DashboardComponent implements OnInit {
 
   constructor() { }
-
 
   ngOnInit(): void {
   }
