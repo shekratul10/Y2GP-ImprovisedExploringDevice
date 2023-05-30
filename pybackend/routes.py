@@ -31,44 +31,44 @@ def index():
 #     try:
 #     except Exception as e:
 
-@app.route('/api/telemetry/add/', methods=['POST'], endpoint='new_telemetry') # retrieves the telemetry from the rover
+@app.route('/api/telemetry/add', methods=['POST'], endpoint='new_telemetry') # retrieves the telemetry from the rover
 def newTelemetry():
     try:
         data = request.get_json()
         position = data['position']
-        velocity = data['velocity']
+        accelerometer = data['accelerometer']
+        gyroscope = data['gyroscope']
         steps = data['steps']
-        tilt = data['tilt']
         state = data['state']
 
-        rover = Rover(position=position, velocity=velocity, steps=steps, tilt=tilt, state=state)
+        rover = Rover(position=position, accelerometer=accelerometer, gyroscope=gyroscope, steps=steps, state=state)
 
         db.session.add(rover)
         db.session.commit() 
 
-        return jsonify({"status": "sucess", "message": f"sucessfully initialised Rover with id={rover.id}"}), 200
+        return jsonify({"status": "sucess", "message": f"sucessfully initialised Rover with id={rover.id}", "id":f"{rover.id}"}), 200
     except KeyError as e:
         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
     
-@app.route('/api/telemetry/update/', methods=['POST'], endpoint='update_telemetry') # retrieves the telemetry from the rover
+@app.route('/api/telemetry/update', methods=['POST'], endpoint='update_telemetry') # retrieves the telemetry from the rover
 def updateTelemetry():
     try:
         data = request.get_json()
         id = data['id']
         position = data['position']
-        velocity = data['velocity']
+        accelerometer = data['accelerometer']
+        gyroscope = data['gyroscope']
         steps = data['steps']
-        tilt = data['tilt']
         state = data['state']
 
         rover = Rover.query.get_or_404(id)
 
         rover.position = position
-        rover.velocity = velocity
+        rover.accelerometer = accelerometer
+        rover.gyroscope = gyroscope
         rover.steps = steps
-        rover.tilt = tilt
         rover.state = state 
 
         db.session.add(rover)

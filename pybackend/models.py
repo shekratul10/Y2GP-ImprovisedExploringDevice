@@ -17,23 +17,29 @@ class Map(db.Model):
 class Rover(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     position= db.Column(db.String(100), nullable=False)
-    velocity = db.Column(db.Integer, nullable=False, default = 0)
+    accelerometer = db.Column(db.String(100), nullable=False, default = "(0,0,0)")
+    gyroscope = db.Column(db.String(100), nullable=False, default="(0,0,0)")
     steps = db.Column(db.Integer, nullable=False, default = 0)
-    tilt = db.Column(db.Float, nullable=False, default = 0.0)
     state = db.Column(db.String(100), nullable=False, default="Rest")
 
-    def __init__(self, position, velocity, steps, tilt, state):
+    def __init__(self, position, accelerometer, gyroscope, steps, state):
         self.position = json.dumps(position)
-        self.velocity = velocity
+        self.accelerometer = json.dumps(accelerometer)
+        self.gyroscope = json.dumps(gyroscope)
         self.steps = steps
-        self.tilt = tilt
         self.state = state
 
     def get_position(self):
         return json.loads(self.position)
+    
+    def get_accelerometer(self):
+        return json.loads(self.accelerometer)
+    
+    def get_gyroscope(self):
+        return json.loads(self.gyroscope)
 
     def __repr__(self):
-        return '<Rover %s, %s, %s, %s, %s>' % (self.position, self.velocity, self.steps, self.tilt, self.state)
+        return '<Rover %s, %s, %s, %s, %s>' % (self.position, self.accelerometer, self.gyroscope , self.steps, self.state)
     
 class Path(db.Model):
     id = db.Column(db.Integer, primary_key=True)
