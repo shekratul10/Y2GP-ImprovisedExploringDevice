@@ -11,7 +11,13 @@ export class RoverDataService {
   constructor(private http:HttpClient) { }
 
   // Local telemetry and map store
-  private telemetry:Telemetry = {id:0,pos:{x:0,y:0},accel:{x:0,y:0,z:0},gyro:{x:0,y:0,z:0}, steps:0,state:"stop"};
+  private telemetry:Telemetry = { id:1,
+                                  position:{x:0,y:0},
+                                  accelerometer:{x:0,y:0,z:0},
+                                  gyroscope:{x:0,y:0,z:0},
+                                  steps:0,
+                                  state:"stop"};
+
   private map: RoverMap = {
     map: [
       [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -39,13 +45,13 @@ export class RoverDataService {
   }
   public set autoUpdate(val:Boolean){
     // Sets a timeout for the function at the refresh time
-    if(val) this.updateTimeout = setTimeout(this.updateData.bind(this), this.updateRefreshTime);
+    if(val) this.updateTimeout = setInterval(this.updateData.bind(this), this.updateRefreshTime);
     // Clear the timeout if disabling
     else clearTimeout(this.updateTimeout);
   }
   // This stupid bit is to convince TypeScript that I am allowed to have an undefined timeout.
-  private updateTimeout:NodeJS.Timeout = undefined as unknown as NodeJS.Timeout;
-  private updateRefreshTime:number = 1000;
+  private updateTimeout:NodeJS.Timer = undefined as unknown as NodeJS.Timer;
+  private updateRefreshTime:number = 200;
 
   public getTelemetry(){
     return this.telemetry;
@@ -60,7 +66,7 @@ export class RoverDataService {
   public roverMapUpdate = new EventEmitter();
 
   private getTelemetryFromServer(){
-    return this.http.get<Telemetry>(`${environment.apiBaseUrl}/api/telemetry/update`)//{params:{auth_code:this.auth_token}})
+    return this.http.get<Telemetry>(`${environment.apiBaseUrl}/api/telemetry`,{params:{id:this.telemetry.id}});//,{params:{auth_code:this.auth_token
   }
 
   private getRoverMapFromServer(){
@@ -78,11 +84,11 @@ export class RoverDataService {
         this.telemetry = data; 
         this.telemetryUpdate.emit()
       });
-    this.getRoverMapFromServer()
-      .subscribe((data:RoverMap) => {
-        this.map = data;
-        this.roverMapUpdate.emit()
-      });
+    // this.getRoverMapFromServer()
+    //   .subscribe((data:RoverMap) => {
+    //     this.map = data;
+    //     this.roverMapUpdate.emit()
+    //   });
   }
 }
 
@@ -107,9 +113,9 @@ export type Command = "start" | "stop";
 
 export interface Telemetry{
   id:number;
-  pos:Position;
-  accel:xyzValue;
-  gyro:xyzValue;
+  position:Position;
+  accelerometer:xyzValue;
+  gyroscope:xyzValue;
   steps:number,
   state:"start"|"stop"|"mapping"|"solving"|"error" //TODO: make this useful
 }
