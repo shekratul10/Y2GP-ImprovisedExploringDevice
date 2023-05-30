@@ -30,12 +30,15 @@ class Rover(db.Model):
         self.state = state
 
     def get_position(self):
+        self.position.replace("'", '"')
         return json.loads(self.position)
     
     def get_accelerometer(self):
+        self.position.replace("'", '"')
         return json.loads(self.accelerometer)
     
     def get_gyroscope(self):
+        self.position.replace("'", '"')
         return json.loads(self.gyroscope)
 
     def __repr__(self):
