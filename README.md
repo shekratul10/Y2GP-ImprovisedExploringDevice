@@ -21,7 +21,7 @@ Repository containing the Frontend and Backend Web Application as part of the 2n
 
   ```javascript
     {
-        "rover_id": int, // id of rover
+        "?id=": int, // id of rover as param
     }
     ```
 
@@ -29,9 +29,11 @@ Repository containing the Frontend and Backend Web Application as part of the 2n
 
     ```javascript
     {
-        "status": str, // "success"
-        "message": str // success message
-        "telemetry": str // telemetry json
+        "position": [int], //coordinates x, y
+        "accelerometer": [int], // x,y,z accel values
+        "gyroscope": [int], // x,y,z gyro values
+        "steps": int, // step count
+        "state": str // current state
     }
     ```
 
@@ -53,7 +55,7 @@ Repository containing the Frontend and Backend Web Application as part of the 2n
 
     ```javascript
     {
-        "map_id": int, // id of map
+        "?id=": int, // id of map as param
     }
     ```
 
@@ -62,9 +64,7 @@ Repository containing the Frontend and Backend Web Application as part of the 2n
 
     ```javascript
     {
-        "status": str, // "success"
-        "message": str // success message
-        "map": str // map json
+        "map": json // map json
     }
     ```
 
@@ -85,9 +85,9 @@ Repository containing the Frontend and Backend Web Application as part of the 2n
 
   ```javascript
   {
-      "position": str // position json
-      "accelerometer": str // accelerometer json
-      "gyroscope": str // gyro json
+      "position": [int] // position json
+      "accelerometer": [int] // accelerometer json
+      "gyroscope": [int] // gyro json
       "steps": int
       "state": str // rover state 
   }
@@ -122,9 +122,9 @@ Repository containing the Frontend and Backend Web Application as part of the 2n
   ```javascript
   {
       "id": int // rover id
-      "position": str // position json
-      "accelerometer": str // accelerometer json
-      "gyroscope": str // gyro json
+      "position": [int] // position json
+      "accelerometer": [int] // accelerometer json
+      "gyroscope": [int] // gyro json
       "steps": int
       "state": str // rover state 
   }
