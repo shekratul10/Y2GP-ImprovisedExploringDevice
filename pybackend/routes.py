@@ -1,3 +1,4 @@
+import json
 from flask import render_template, request, jsonify
 from pybackend import app, db
 from pybackend.models import Map, Rover, Path
@@ -16,12 +17,12 @@ def index():
 def getTelemetry():
     try:
         id = request.args.get('id')
-        return jsonify(buffer[int(id)])
+        # return jsonify(buffer[int(id)])
         # id = int(data)
 
-        # telemetry = Rover.query.filter_by(id=id).first()
+        telemetry = Rover.query.filter_by(id=id).first()
 
-        # return jsonify({"id":telemetry.id, "position": telemetry.get_position(), "accelerometer":telemetry.get_accelerometer(), "gyroscope": telemetry.get_gyroscope(), "steps":telemetry.steps, "state":telemetry.state})
+        return jsonify({"id":telemetry.id, "position": telemetry.get_position(), "accelerometer":telemetry.get_accelerometer(), "gyroscope": telemetry.get_gyroscope(), "steps":telemetry.steps, "state":telemetry.state})
         
     except Exception as e:
         return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
@@ -65,24 +66,24 @@ def newTelemetry():
 def updateTelemetry():
     try:
         data = request.get_json()
-        buffer[data['id']] = data
-        # id = data['id']
-        # position = data['position']
-        # accelerometer = data['accelerometer']
-        # gyroscope = data['gyroscope']
-        # steps = data['steps']
-        # state = data['state']
+        # buffer[data['id']] = data
+        id = data['id']
+        position = json.dumps(data['position'])
+        accelerometer = json.dumps(data['accelerometer'])
+        gyroscope = json.dumps(data['gyroscope'])
+        steps = data['steps']
+        state = data['state']
 
-        # rover = Rover.query.get_or_404(id)
+        rover = Rover.query.get_or_404(id)
 
-        # rover.position = position
-        # rover.accelerometer = accelerometer
-        # rover.gyroscope = gyroscope
-        # rover.steps = steps
-        # rover.state = state 
+        rover.position = position
+        rover.accelerometer = accelerometer
+        rover.gyroscope = gyroscope
+        rover.steps = steps
+        rover.state = state 
 
-        # db.session.add(rover)
-        # db.session.commit()
+        db.session.add(rover)
+        db.session.commit()
 
         return jsonify({"status": "success", "message": f"successfully updated Rover with id={id}"}), 200
     except KeyError as e:
