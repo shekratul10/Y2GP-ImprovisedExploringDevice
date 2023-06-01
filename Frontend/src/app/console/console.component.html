@@ -1,6 +1,11 @@
+<div id="console">
 <mat-card>
     <mat-card-header><h1>Console Log</h1></mat-card-header>
+    <div class="console-window">
     <div *ngFor="let entry of log.text; index as i;">
         <p [ngClass]="entry.level">{{entry.timestamp.toLocaleTimeString('en-GB')}} {{entry.level.toUpperCase()}}: {{entry.message}}</p>
     </div>
+    </div>
 </mat-card>
+</div>
+<button mat-raised-button (click)="this.log.clear()">Clear</button>

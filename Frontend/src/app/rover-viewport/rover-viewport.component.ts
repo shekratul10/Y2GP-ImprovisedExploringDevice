@@ -12,31 +12,35 @@ import { RoverDataService } from '../rover-data.service';
 })
 export class RoverViewportComponent implements OnInit {
 
-  constructor(private domElement: ElementRef, roverData:RoverDataService) {
+  constructor(private domElement: ElementRef,private roverData:RoverDataService) {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.keyLight = new Three.DirectionalLight(new Three.Color('hsl(30, 100%, 75%)'), 1.0);
     this.fillLight = new Three.DirectionalLight(new Three.Color('hsl(240, 100%, 75%)'), 0.75);
     this.backLight = new Three.DirectionalLight(0xffffff, 1.0);
   }
+
   viewportSize = {x:500,y:500}
   fixedCameraDistance = 280; // Set the desired fixed distance
-  renderer = new Three.WebGLRenderer();
+  renderer = new Three.WebGLRenderer({alpha:true});
   scene = new Three.Scene();
   camera = new Three.PerspectiveCamera(75, this.viewportSize.x / this.viewportSize.y, 0.1, 1000);
   controls: OrbitControls;
   keyLight: Three.DirectionalLight;
   fillLight: Three.DirectionalLight;
   backLight: Three.DirectionalLight;
-  mtlLoader = new MTLLoader();
+  rover: Three.Group | null  = null;
+
 
 
   ngOnInit(): void {
+    this.roverData.telemetryUpdate.subscribe(() => this.changeRoverOrientation())
     this.renderer.setSize(this.viewportSize.x, this.viewportSize.y);
     this.domElement.nativeElement.querySelector('div.viewport').appendChild(this.renderer.domElement);
     this.initialize();
     this.animate();
   }
 
+  // Create all the objects and load the materials
   initialize() {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.25;
@@ -49,14 +53,15 @@ export class RoverViewportComponent implements OnInit {
     this.scene.add(this.fillLight);
     this.scene.add(this.backLight);
     //this.mtlLoader.setTexturePath('assets/');
-    this.mtlLoader.setPath('assets/');
-    this.mtlLoader.load('r2-d2.mtl', (materials) => {
+    let mtlLoader = new MTLLoader();
+    mtlLoader.setPath('assets/');
+    mtlLoader.load('r2-d2.mtl', (materials) => {
       materials.preload();
-
       var objLoader = new OBJLoader();
       objLoader.setMaterials(materials);
       objLoader.setPath('assets/');
       objLoader.load('verticalrover.obj', (object) => {
+        this.rover = object;
         this.scene.add(object);
         object.position.y -= 60;
 
@@ -74,6 +79,12 @@ export class RoverViewportComponent implements OnInit {
         this.controls.target.copy(center);
       });
     });
+  }
+
+  changeRoverOrientation(){
+    let t = this.roverData.getTelemetry()
+    this.rover?.rotation.set(t.gyroscope.y,t.accelerometer.z,t.accelerometer.x);
+
   }
 
   animate() {

@@ -8,7 +8,7 @@ export class ConsoleService {
 
   constructor() { }
 
-  private _text:ConsoleEntry[] = [{timestamp:new Date(Date.now()),level:"log", message:"Test Log"}, {timestamp:new Date(Date.now()), level:"warn", message:"Test Warning"}, {timestamp:new Date(Date.now()), level:"error",message:"Test Error"},{timestamp:new Date(Date.now()), level:"fatal",message:"Test Fatal Error"}];
+  private _text:ConsoleEntry[] = [];
   public get text(){
     return this._text;
   }
@@ -37,6 +37,10 @@ export class ConsoleService {
     let c:ConsoleEntry = {timestamp:new Date(Date.now()), message:input, level:"fatal"};
     this.text.push(c);
     this.ConsoleEvent.emit(c);
+  }
+
+  clear(){
+    this.text = [];
   }
 
 }

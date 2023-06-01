@@ -1,14 +1,15 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
-import { catchError } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { ConsoleService } from './console.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoverDataService {
 
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient, private consoleService:ConsoleService) { }
 
   // Local telemetry and map store
   private telemetry:Telemetry = { id:1,
@@ -35,7 +36,7 @@ export class RoverDataService {
   
   
 //LoS is loss of signal, to be set if there is either a server timeout or data is too old
-  LoS:boolean = false;
+  LoS:boolean = true;
   auth_token:string = "";
 
   // Auto update boolean to be enabled or disabled from the interface
@@ -43,8 +44,9 @@ export class RoverDataService {
   public get autoUpdate(){
     return this._autoUpdate;
   }
-  public set autoUpdate(val:Boolean){
+  public set autoUpdate(val:boolean){
     // Sets a timeout for the function at the refresh time
+    this._autoUpdate=val;
     if(val) this.updateTimeout = setInterval(this.updateData.bind(this), this.updateRefreshTime);
     // Clear the timeout if disabling
     else clearTimeout(this.updateTimeout);
@@ -79,9 +81,10 @@ export class RoverDataService {
 
   //TODO: Might separate these into independent auto updaters
   private updateData(){
-    this.getTelemetryFromServer()
+    this.getTelemetryFromServer().pipe(catchError(this.errorHandler.bind(this)))
       .subscribe((data:Telemetry) => {
         this.telemetry = data; 
+        this.LoS=false;
         this.telemetryUpdate.emit()
       });
     // this.getRoverMapFromServer()
@@ -89,6 +92,17 @@ export class RoverDataService {
     //     this.map = data;
     //     this.roverMapUpdate.emit()
     //   });
+  }
+
+  private errorHandler(error: HttpErrorResponse) {
+    if(error.status === 0){
+      this.consoleService.error(error.error);
+    }
+    else{
+      this.consoleService.error(`Backend error ${error.status}: ${error.error}`)
+      this.LoS=true;
+    }
+    return throwError(() => new Error('Something bad happened; please try again later.'));
   }
 }
 

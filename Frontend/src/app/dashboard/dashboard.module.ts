@@ -9,6 +9,9 @@ import { ControlPanelComponent } from '../control-panel/control-panel.component'
 import { TelemetryComponent } from '../telemetry/telemetry.component';
 import { MapComponent } from '../map/map.component';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'
 
 const routes: Routes = [
   { path: '', component: DashboardComponent }
@@ -28,6 +31,9 @@ const routes: Routes = [
     MatCardModule,
     MatGridListModule,
     MatButtonModule,
+    MatSlideToggleModule,
+    FormsModule,
+
   ]
 })
 export class DashboardModule { }

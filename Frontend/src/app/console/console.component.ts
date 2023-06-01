@@ -13,6 +13,4 @@ export class ConsoleComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  
-
 }

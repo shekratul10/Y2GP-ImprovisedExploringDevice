@@ -1,23 +1,30 @@
-<h2>Telemetry</h2>
+<mat-card>
+<mat-card-title>Telemetry</mat-card-title>
 <div *ngIf="!roverData.LoS">
     <ul>
         <h3>Position:</h3>
+        <ul>
         <li>
             <p>X: {{telemetry.position.x.toFixed(2)}}</p>
             <p>Y: {{telemetry.position.y.toFixed(2)}}</p>
         </li>
+        </ul>
         <h3>Accelerometer:</h3>
+        <ul>
         <li>
             <p>X: {{telemetry.accelerometer.x.toFixed(2)}}</p>
             <p>Y: {{telemetry.accelerometer.y.toFixed(2)}}</p>
             <p>Z: {{telemetry.accelerometer.z.toFixed(2)}}</p>
         </li>
+        </ul>
         <h3>Gyro:</h3>
+        <ul>
         <li>
             <p>X: {{telemetry.gyroscope.x.toFixed(2)}}</p>
             <p>Y: {{telemetry.gyroscope.y.toFixed(2)}}</p>
             <p>Z: {{telemetry.gyroscope.z.toFixed(2)}}</p>
         </li>
+        </ul>
         <li>
             Status: {{telemetry.state}}
         </li>
@@ -26,3 +33,4 @@
 <div *ngIf="roverData.LoS">
     <h3>LoS</h3>
 </div>
+</mat-card>

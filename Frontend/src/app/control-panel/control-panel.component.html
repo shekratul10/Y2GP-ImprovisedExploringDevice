@@ -1,1 +1,8 @@
-<button mat-raised-button (click)="btnClick()">{{stateDisplay}}</button>
+<ul>
+    <li>
+        <button mat-raised-button (click)="btnClick()">{{stateDisplay}}</button>
+    </li>
+    <li>
+        <mat-slide-toggle [(ngModel)]="this.roverData.autoUpdate">Auto-update</mat-slide-toggle>
+    </li>
+</ul>
