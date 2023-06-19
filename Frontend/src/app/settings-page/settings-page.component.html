@@ -1,0 +1,33 @@
+<mat-card>
+    <mat-card-header>
+        <h1>Settings</h1>
+    </mat-card-header>
+    <div>
+        <mat-form-field>
+            <mat-label>Rover ID</mat-label>
+            <input matInput type="number" [(ngModel)]="this.settings.roverId" />
+        </mat-form-field>
+    </div>
+    <div>
+        <mat-form-field>
+            <mat-label>Refresh Timeout</mat-label>
+            <input matInput type="number" [(ngModel)]="this.settings.refreshRate" />
+        </mat-form-field>
+    </div>
+    <div *ngFor="let beaconPos of this.settings.beaconPositions">
+        <mat-label>{{beaconPos.beaconColour.toLocaleUpperCase()}}</mat-label>
+        <div>
+            <mat-form-field>
+                <mat-label>X:</mat-label>
+                <input matInput type="number" [(ngModel)]="beaconPos.x" />
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field>
+                <mat-label>Y:</mat-label>
+                <input matInput type="number" [(ngModel)]="beaconPos.y" />
+            </mat-form-field>
+        </div>
+    </div>
+    <button mat-raised-button (click)="saveSettings()">Save</button>
+</mat-card>

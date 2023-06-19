@@ -3,13 +3,26 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConsoleService } from './console.service';
+import { SettingsService } from './settings.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoverDataService {
 
-  constructor(private http:HttpClient, private consoleService:ConsoleService) { }
+  constructor(private http:HttpClient, private consoleService:ConsoleService, private settingsServe:SettingsService) { 
+    // Subscribe to the settings service to update the refresh rate
+    this.settingsServe.settingsChanged.subscribe((settings) => {
+      consoleService.log("Refresh rate changed to " + settings.refreshRate + "ms");
+      consoleService.log("Rover ID Changed to " + settings.roverId);
+      // If auto update is enabled, clear the timeout and set a new one
+      if(this.autoUpdate){
+        clearTimeout(this.updateTimeout);
+        this.updateTimeout = setInterval(this.updateData.bind(this), settings.refreshRate);
+        
+      }
+    });
+  }
 
   // Local telemetry and map store
   private telemetry:Telemetry = { id:1,
@@ -47,13 +60,12 @@ export class RoverDataService {
   public set autoUpdate(val:boolean){
     // Sets a timeout for the function at the refresh time
     this._autoUpdate=val;
-    if(val) this.updateTimeout = setInterval(this.updateData.bind(this), this.updateRefreshTime);
+    if(val) this.updateTimeout = setInterval(this.updateData.bind(this), this.settingsServe.settings.refreshRate);
     // Clear the timeout if disabling
     else clearTimeout(this.updateTimeout);
   }
   // This stupid bit is to convince TypeScript that I am allowed to have an undefined timeout.
   private updateTimeout:NodeJS.Timer = undefined as unknown as NodeJS.Timer;
-  private updateRefreshTime:number = 200;
 
   public getTelemetry(){
     return this.telemetry;

@@ -1,6 +1,6 @@
 {
     "/api":{
-        "target":" http://18.169.16.7",
+        "target":" http://35.178.177.15",
         "secure":false
     }
 }
