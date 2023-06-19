@@ -1,10 +1,13 @@
-import json
 from flask import render_template, request, jsonify
 from pybackend import app, db
 from pybackend.models import Map, Rover, Path
 
+import pybackend.img_proceessor as img
+import json
+import numpy as np
+import qoi
 
-buffer = {}
+
 
 @app.route('/')
 def index():
@@ -22,7 +25,7 @@ def getTelemetry():
 
         telemetry = Rover.query.filter_by(id=id).first()
 
-        return jsonify({"id":telemetry.id, "position": telemetry.get_position(), "accelerometer":telemetry.get_accelerometer(), "gyroscope": telemetry.get_gyroscope(), "steps":telemetry.steps, "state":telemetry.state})
+        return jsonify({"id":telemetry.id, "position": telemetry.get_position(), "accelerometer":telemetry.get_accelerometer(), "gyroscope": telemetry.get_gyroscope(), "steps":telemetry.steps, "state":telemetry.state}), 200
         
     except Exception as e:
         return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
@@ -108,3 +111,18 @@ def updateTelemetry():
 # def getPath():
 #     try:
 #     except Exception as e:
+# @app.route('/api/img_processor', methods=['POST'], endpoint='img_processor')
+# def imgProcessor():
+#     try:
+#         compressed_img = request.data
+#         image = qoi.decode(compressed_img)
+
+#         success = img.process(image)
+
+#         return jsonify({}), 200
+
+#     except KeyError as e:
+#         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
+#     except Exception as e:
+#         return jsonify({"status": "error", "message": str(e)}), 400
+    

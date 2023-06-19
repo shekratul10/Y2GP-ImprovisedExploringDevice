@@ -1,18 +1,48 @@
 from pybackend import db
 import json
 
+
 class Map(db.Model):
+    __tablename__ = 'maps'
+
     id = db.Column(db.Integer, primary_key=True)
-    map_array = db.Column(db.String(1000), nullable=False, default='')
-
-    def __init__(self, map_array):
-        self.map_array = json.dumps(map_array)
-
-    def get_map_array(self):
-        return json.loads(self.map_array)
+    name = db.Column(db.String(50), unique=True)
+    # Add any additional fields as needed
 
     def __repr__(self):
-        return '<Map %r>' % self.map_array
+        return f"Map({self.id}, {self.name})"
+
+class Node(db.Model):
+    __tablename__ = 'nodes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    x = db.Column(db.Integer)
+    y = db.Column(db.Integer)
+    map_id = db.Column(db.Integer, db.ForeignKey('maps.id'))
+    # Add any additional fields as needed
+
+    map = db.relationship('Map', backref='nodes')
+
+    def __repr__(self):
+        return f"Node({self.id}, {self.x}, {self.y})"
+
+class Edge(db.Model):
+    __tablename__ = 'edges'
+
+    id = db.Column(db.Integer, primary_key=True)
+    source_node_id = db.Column(db.Integer, db.ForeignKey('nodes.id'))
+    target_node_id = db.Column(db.Integer, db.ForeignKey('nodes.id'))
+    weight = db.Column(db.Float)
+    map_id = db.Column(db.Integer, db.ForeignKey('maps.id'))
+    # Add any additional fields as needed
+
+    source_node = db.relationship('Node', foreign_keys=[source_node_id])
+    target_node = db.relationship('Node', foreign_keys=[target_node_id])
+    map = db.relationship('Map', backref='edges')
+
+    def __repr__(self):
+        return f"Edge({self.id}, {self.source_node_id}, {self.target_node_id}, {self.weight})"
+
     
 class Rover(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,3 +87,6 @@ class Path(db.Model):
     
     def __repr__(self):
         return '<Path %r>' % self.directions
+    
+
+
