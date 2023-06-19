@@ -9,3 +9,6 @@ The dashboard is built with [Angular](https://angular.io/).
 - Send start and stop commands to the rover. 
 - Render the rover's internal map and pathfinding.
 - Scale to control multiple rovers through an authentication system
+
+## API Docs
+The API documentation can be found [here](https://github.com/shekratul10/Y2-GrProject-Web_App/blob/main/doc/APIdocumentation.md)
