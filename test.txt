@@ -1,0 +1,80 @@
+sudo journalctl -u pybackend.service
+
+#ubuntu command so view log of pybackend.service
+
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+class Maze(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    description = db.Column(db.Text)
+
+class Node(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    maze_id = db.Column(db.Integer, db.ForeignKey('maze.id'))
+    position_x = db.Column(db.Integer)
+    position_y = db.Column(db.Integer)
+    neighbors = db.relationship('Relationship', backref='start_node', lazy=True)
+
+class Relationship(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    start_node_id = db.Column(db.Integer, db.ForeignKey('node.id'))
+    end_node_id = db.Column(db.Integer, db.ForeignKey('node.id'))
+    # Additional attributes for the relationship, such as weight, direction, etc.
+
+
+To link nodes together in a maze where nodes can have multiple paths, you can represent the maze as a graph data structure.
+Each node in the graph represents a location in the maze, and the edges between nodes represent the possible paths.
+Here's an example of how you can create a graph data structure to represent a maze:
+
+1. Define a `Node` class to represent a location in the maze:
+
+```python
+class Node:
+    def __init__(self, id):
+        self.id = id
+        self.neighbors = []  # List of neighboring nodes
+
+    def add_neighbor(self, neighbor):
+        self.neighbors.append(neighbor)
+```
+
+2. Create instances of `Node` to represent each location in the maze.
+For example, if your maze has a 3x3 grid, you can create a 2D array of `Node` objects:
+
+```python
+maze = [
+    [Node(0), Node(1), Node(2)],
+    [Node(3), Node(4), Node(5)],
+    [Node(6), Node(7), Node(8)]
+]
+```
+
+3. Connect the nodes by adding neighbors.
+For each node, identify the possible paths to neighboring nodes and use the `add_neighbor()` method to establish the connections:
+
+```python
+maze[0][0].add_neighbor(maze[0][1])  # Connect node 0 to node 1
+maze[0][0].add_neighbor(maze[1][0])  # Connect node 0 to node 3
+# ... continue adding connections for other nodes
+```
+
+4. Repeat step 3 for each node in the maze, considering the possible paths from that node.
+This process will depend on the specific structure and rules of your maze.
+
+By representing the maze as a graph, you can easily navigate between nodes and traverse the maze.
+You can also use graph algorithms like depth-first search or breadth-first search to solve maze-related problems.
+
+When displaying the maze in your Angular application, you can use the graph data structure to determine the connections
+between nodes and render them accordingly.
+This could involve drawing lines, connecting dots, or using other visualization techniques to represent the paths in the maze.
+
+
+Features:
+ - Straight paths
+ - Corners 
+ - Deadend
+ - T junction, + junction
+ - Start and End nodes
