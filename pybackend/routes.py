@@ -1,11 +1,9 @@
 from flask import render_template, request, jsonify
 from pybackend import app, db
-from pybackend.models import Map, Rover, Path
+from pybackend.models import Map, Rover, Node, Edge
 
-import pybackend.img_proceessor as img
 import json
 import numpy as np
-import qoi
 
 
 
@@ -30,19 +28,13 @@ def getTelemetry():
     except Exception as e:
         return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
 
-# @app.route('/api/map', methods=['GET']) # retrieves processed map form rover
-# def getMap():
-#     try:
-#        
-#     except Exception as e:
-#        return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
+@app.route('/api/map', methods=['GET']) # retrieves processed map form rover
+def getMap():
+    try:
+       
+    except Exception as e:
+       return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
 
-
-
-# @app.route('/api/command', methods=['GET']) #decide start stop
-# def Command():
-#     try:
-#     except Exception as e:
 
 @app.route('/api/telemetry/add', methods=['POST'], endpoint='new_telemetry') # retrieves the telemetry from the rover
 def newTelemetry():
@@ -59,7 +51,7 @@ def newTelemetry():
         db.session.add(rover)
         db.session.commit() 
 
-        return jsonify({"status": "sucess", "message": f"sucessfully initialised Rover with id={rover.id}", "id":f"{rover.id}"}), 200
+        return {"status": "sucess", "message": f"sucessfully initialised Rover with id={rover.id}", "id":f"{rover.id}"}), 200
     except KeyError as e:
         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
     except Exception as e:
@@ -96,33 +88,59 @@ def updateTelemetry():
 
 
 
-# @app.route('/api/map/add', methods=['POST']) # stores the map from the rover
-#     try:
-#        map_array = request.form['map_array']
-#        
-#        map = Map(map_array=map_array)
-#        db.session.add(map)
-#        db.session.commit()
-#        return {"status": "sucess", "message": f"sucessfully initialised Map with id={map.id}"}, 200
-#     except Exception as e:
-#        return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
+@app.route('/api/map/add', methods=['POST'], endpoint='initialise_map' ) # stores the map from the rover
+def addMap():
+    try:
+       data = request.get_json()
+       name = data['name']
 
-# @app.route('/api/path', methods=['POST']) # gives the path to the rover
-# def getPath():
-#     try:
-#     except Exception as e:
-# @app.route('/api/img_processor', methods=['POST'], endpoint='img_processor')
-# def imgProcessor():
-#     try:
-#         compressed_img = request.data
-#         image = qoi.decode(compressed_img)
+       map = Map(name=name)
 
-#         success = img.process(image)
+       db.session.add(map)
+       db.session.commit() 
 
-#         return jsonify({}), 200
+       return map.id
+    except KeyError as e:
+        return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
 
-#     except KeyError as e:
-#         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
-#     except Exception as e:
-#         return jsonify({"status": "error", "message": str(e)}), 400
+@app.route('/api/map/add_node', methods=['POST'], endpoint='add_node') # stores the map from the rover
+def addNode():
+    try:
+       data = request.get_json()
+       x = data['x']
+       y = data['y']
+       map_id = data['map_id']
+
+
+       node = Node(x=x, y=y, map_id=map_id)
+
+       db.session.add(node)
+       db.session.commit() 
+
+       return node.id
+    except KeyError as e:
+        return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
     
+@app.route('/api/map/add_edge', methods=['POST'], endpoint='add_edge') # stores the map from the rover
+def addMap():
+    try:
+       data = request.get_json()
+       source_node_id = data['source_node_id']
+       target_node_id = data['target_node_id']
+       weight = data['weight']
+       map_id = data['map_id']
+
+       edge = Edge(source_node_id=source_node_id, target_node_id=target_node_id, weight=weight, map_id=map_id)
+
+       db.session.add(edge)
+       db.session.commit() 
+
+       return 200
+    except KeyError as e:
+        return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
