@@ -32,20 +32,7 @@ export class RoverDataService {
                                   steps:0,
                                   state:"stop"};
 
-  private map: RoverMap = {
-    map: [
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-      [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
-    ]
-  }; //TODO: Remove the test data
+  private map: RoverMap = {id:-1,nodes:[],edges:[]}; //TODO: Remove the test data
   
   
 //LoS is loss of signal, to be set if there is either a server timeout or data is too old
@@ -80,15 +67,15 @@ export class RoverDataService {
   public roverMapUpdate = new EventEmitter();
 
   private getTelemetryFromServer(){
-    return this.http.get<Telemetry>(`${environment.apiBaseUrl}/api/telemetry`,{params:{id:this.telemetry.id}});//,{params:{auth_code:this.auth_token
+    return this.http.get<Telemetry>(`${environment.apiBaseUrl}/api/telemetry`,{params:{id:this.telemetry.id}});
   }
 
   private getRoverMapFromServer(){
-    return this.http.get<RoverMap>(`${environment.apiBaseUrl}/api/map`);//,{params:{auth_code:this.auth_token}})
+    return this.http.get<RoverMap>(`${environment.apiBaseUrl}/api/map` ,{params:{id:this.settingsServe.settings.mapId}});
   }
 
   public sendCommand(com:Command){
-    this.http.post(`${environment.apiBaseUrl}/api/cmd`, com);//,{params:{auth_code:this.auth_token}});
+    this.http.post(`${environment.apiBaseUrl}/api/cmd`, com);
   }
 
   //TODO: Might separate these into independent auto updaters
@@ -99,11 +86,11 @@ export class RoverDataService {
         this.LoS=false;
         this.telemetryUpdate.emit()
       });
-    // this.getRoverMapFromServer()
-    //   .subscribe((data:RoverMap) => {
-    //     this.map = data;
-    //     this.roverMapUpdate.emit()
-    //   });
+    this.getRoverMapFromServer()
+      .subscribe((data:RoverMap) => {
+        this.map = data;
+        this.roverMapUpdate.emit()
+      });
   }
 
   private errorHandler(error: HttpErrorResponse) {
@@ -121,7 +108,21 @@ export class RoverDataService {
 
 //TODO: Figure out an actual data type for the map (probably a 2d array)
 export type RoverMap = {
-  map:number[][];
+  id:number;
+  edges:MapEdge[];
+  nodes:MapNode[];
+}
+
+export type MapEdge = {
+  id:number;
+  source_node_id:number;
+  target_node_id:number;
+  weight:number;
+}
+
+export type MapNode = {
+  id:number;
+  position:Position;
 }
 
 export type Position = {

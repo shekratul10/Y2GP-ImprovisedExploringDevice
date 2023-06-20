@@ -7,7 +7,7 @@ export class SettingsService {
 
   constructor() { }
 
-  private _settings: Settings = {roverId:0, refreshRate: 200, beaconPositions: [{ beaconColour: "red", x: 0, y: 0 }, { beaconColour: "blue", x: 0, y: 0 }, { beaconColour: "orange", x: 0, y: 0 }] }
+  private _settings: Settings = {roverId:0, mapId:0, refreshRate: 200, beaconPositions: [{ beaconColour: "red", x: 0, y: 0 }, { beaconColour: "blue", x: 0, y: 0 }, { beaconColour: "orange", x: 0, y: 0 }] }
   public get settings(): Settings {
     return this._settings;
   }
@@ -22,6 +22,7 @@ export class SettingsService {
 
 export interface Settings {
   roverId:number;
+  mapId:number;
   refreshRate: number;
   beaconPositions: BeaconPosition[];
 }
