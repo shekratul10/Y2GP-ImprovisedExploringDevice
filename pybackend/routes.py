@@ -126,7 +126,7 @@ def addNode():
         return jsonify({"status": "error", "message": str(e)}), 400
     
 @app.route('/api/map/add_edge', methods=['POST'], endpoint='add_edge') # stores the map from the rover
-def addMap():
+def addEdge():
     try:
        data = request.get_json()
        source_node_id = data['source_node_id']
