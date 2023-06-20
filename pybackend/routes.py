@@ -31,6 +31,39 @@ def getTelemetry():
 @app.route('/api/map', methods=['GET']) # retrieves processed map form rover
 def getMap():
     try:
+        id = request.args.get('id')
+
+        nodes = Node.query.filter_by(id=id).first()
+        edges = Edge.query.filter_by(id=id).first()
+
+        # Prepare the graph data structure
+        graph_data = {
+            'nodes': [],
+            'edges': []
+        }
+
+        # Add nodes to the graph data
+        for node in nodes:
+            node_data = {
+                'id': node.id,
+                'position': {'x': node.x, 'y': node.x}
+            }
+            graph_data['nodes'].append(node_data)
+
+        # Add edges to the graph data
+        for edge in edges:
+            edge_data = {
+                'id': edge.id,
+                'source': edge.source_node_id,
+                'target': edge.target_node_id,
+                'weight': edge.weight
+                
+            }
+            graph_data['edges'].append(edge_data)
+
+        # Return the graph data as a JSON response
+        return jsonify(graph_data)
+
        
     except Exception as e:
        return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
