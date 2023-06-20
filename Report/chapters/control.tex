@@ -24,7 +24,7 @@ The concept of a self-balancing Segway is derived heavily from the theory of an 
 The inverted pendulum system was stabilised using a proportional-integral-derivative (PID) control approach. A response proportionate to the discrepancy between the desired and actual positions of the pendulum is provided by the proportional term. While the derivative term projects future errors based on the error's rate of change, the integral term integrates the error through time to eliminate steady-state errors. The response of the control system can be enhanced by varying the weights given to each component otherwise known as tuning the PID values.
 
 \begin{figure}
-    \centerline{\includegraphics[width=0.4\textwidth]{images/control-flow.png}}
+    \centerline{\includegraphics[width=0.8\textwidth]{images/control-flow.png}}
     \caption{Control flow diagram}
 \end{figure}
 Before diving into building a PID controller, the idea of just a P controller working would allow for easy implementation and design. This flowchart represents a controller that provides a simple reaction by increasing and decreasing the speed of the motor wheels to account for the changes in tilt. This was the original designed controller but proved to have many issues including a slow reaction speed to impulse responses, inaccuracies, and imprecise responses when subject to subtle perturbations.  
@@ -50,7 +50,7 @@ With this design in mind, it would help to build and test a control system using
 
 \begin{figure}
     \centerline{\includegraphics[width=\textwidth]{images/simulink-diagram.png}}
-    \caption{Simulink model of PID controller}
+    \caption{Simulink model of PID controller \cite{ref:balance_sim}}
 \end{figure}
 
 Using this it is easy to simulate what effect, different values of PID will have on the system. 

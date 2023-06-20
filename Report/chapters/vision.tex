@@ -48,6 +48,8 @@ The coordinates of each of the boxes were passed to the NIOS II processor using 
 
 The implementation of the beacon detection was successful in recognising each of the beacons, however there was an issue posed by the orange beacon as it cannot be detected in its entirety. This does not interfere greatly with the function of the segway regarding triangulation as the vision system still detects the centre of the beacon correctly, just not completely. Given more time, it would have been beneficial to the function of the rover if more time was invested in implementing conversion to HSV so that the beacons would be detected more accurately, reducing the risk of error in the coordinates of the centre of each beacon.
 
+\newpage
+
 \subsection{Triangulation}
 
 The coordinate information from the vision system is passed onto the ESP32, where it is combined with wheel odometry to determine a position for the segway to complement the dead reckoning to ensure accuracy in the localisation of the rover.

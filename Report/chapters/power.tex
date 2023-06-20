@@ -44,9 +44,10 @@ The PV panels are also connected to a boost switch mode power supply (SMPS) for 
 
 The results are as expected. The IV characteristic shows a plateau at lower voltages with around 0.65 mA and has a significant drop at larger than 5V. This results in an expected graph of power, which shows that the maximum output power would be around 4V to 5V.
 
+\newpage
 \subsection{Maximum Power Point Tracking}
 
-\begin{figure}
+\begin{wrapfigure}{r}{0.5\linewidth}
     \footnotesize
     \begin{minted}{python}
 power1 = vb * iL;
@@ -73,7 +74,7 @@ else{
     \end{minted}
     \caption{}
     \label{code:pert_observe}
-\end{figure}
+\end{wrapfigure}
 
 Maximum power point tracking (MPPT) is used mainly to maximize the power output from the PV panels by adjusting the operating point. The algorithm continuously monitors the output voltage and current and adjusts the operating point. This ensures the system to harvest the maximum power from the PV panels for most of the conditions. This will negate small oscillations coming from the current supply due to weather conditions such as a cloud blocking the sun. The algorithm is implemented in a perturb and observe method~\cite{ref:mppt}. The code implemented is shown in figure \ref{code:pert_observe}. The code gets the current value and past value of voltage and current and compares them. When the power and voltage are both larger, it means that it has not reached it’s maximum power, and duty cycle is further increased. In the code, the duty cycle is decreased. This is correct since the PMOS is the boost SMPS reverses the operation. The algorithm ensures that the power in the DC grid will be as high as possible at any given time, given a steady brightness of the LED beacons as much as possible.
 
@@ -163,10 +164,13 @@ A saturation function is also introduced in the code to prevent overshoot. This 
 
 The result of the controller is that the input of LED driver could work up to 15V without the LED breaking on the output side. This is sufficiently enough since the LEDs would not be wanted to work on the edge of breaking and the voltage limit on the LED drivers is 18V. Moreover, the output of the boost SMPS does not allow such high voltage. Therefore, the design of the LED drivers is safe enough to not break.
 
+\newpage
+
 \subsection{Initial Design}
 
 \begin{wrapfigure}{r}{0.4\textwidth}
     \includegraphics[width=0.38\textwidth]{images/all-leds.jpg}
+    \caption{All three LED beacons lit up}
 \end{wrapfigure}
 
 After testing out each of the LED drivers with LED lights, three of them are put together in parallel connect to the power supply. The test is operated at a voltage of 10V. All 3 of the LED beacons are successfully lit up. The next step is to the with an emulated PV panel with a power supply. Previously, the boost SMPS with PV panels and each of the LED beacons are tested separately and each of them are working as intended. When combined into a circuit, it is expected to light the LED beacons up. To emulate PV panels, the current limit is set to 0.7A and the voltage is changed from 4V to 5V.

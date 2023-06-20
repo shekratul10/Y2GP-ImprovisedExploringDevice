@@ -11,6 +11,7 @@
 \usepackage{subcaption}
 \usepackage{amsmath}
 \usepackage{minted}
+\usepackage{hyperref}
 \usepackage[style=ieee]{biblatex}
 \addbibresource{references.bib}
 %\usepackage{showframe} %TODO: REMOVE
@@ -30,25 +31,34 @@
 
 
 \input{chapters/abstract}
+\newpage
 \input{chapters/specification}
 \newpage
 \input{chapters/resources}
 \newpage
 \input{chapters/management.tex}
+\newpage
 \section{Web Application}
 \input{chapters/frontend.tex}
+\newpage
 \input{chapters/backend.tex}
+\newpage
 \input{chapters/control.tex}
 \newpage
 \input{chapters/power.tex}
+\newpage
 \input{chapters/vision.tex}
+\newpage
 \input{chapters/manufacturing.tex}
+\newpage
 \input{chapters/integration.tex}
+\newpage
 \input{chapters/evaluation.tex}
 
 \newpage
 \section{References}
 \printbibliography[heading=none]
 
+\newpage
 \input{chapters/appendix.tex}
 \end{document}
