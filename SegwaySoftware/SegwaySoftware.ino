@@ -1,4 +1,5 @@
 
+#include <AccelStepper.h>
 #include <ESP32SPISlave.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -16,13 +17,41 @@ const char *ssid = "H-P7";
 const char *pwd = "testing123";
 #define SERVER_API_BASE "13.41.162.40"
 #define TELEMETRY_ENDPOINT "/telemetry/update"
-#define MAP_ENDPOINT "/map/update"
-#define DISTANCE_PER_STEP 0.102101761
+#define MAP_ADD_ENDPOINT "/map/add"
+#define NODE_ADD_ENDPOINT "/map/add_node"
+#define EDGE_ADD_ENDPOINT "/map/add_edge"
+#define DISTANCE_PER_STEP 0.102101761 //cm
+#define SEGWAY_WIDTH 17.5 //cm
+
+const int ldrPin1 = 25;
+const int ldrPin2 = 33;
+const int ldrPin3 =  32;
+// const int ldrPin4 = ;
+
+// LDR thresholds
+const int maxThreshold = 590;
+const int minThreshold = 180;
+const int frontThreshold = 360;
+
+// Motor pin definitions
+const int motorLeftStepPin = 26;
+const int motorLeftDirPin = 27;
+const int motorRightStepPin = 12;
+const int motorRightDirPin = 14;
+
+// Adjust if needed, probably not though.
+const int stepDelay = 200;
+
+// Create instances of AccelStepper for the two motors
+AccelStepper motorLeft(AccelStepper::DRIVER, motorLeftStepPin, motorLeftDirPin);
+AccelStepper motorRight(AccelStepper::DRIVER, motorRightStepPin, motorRightDirPin);
 
 enum Endpoint
 {
     telemetry_update,
-    map_update,
+    map_add,
+    node_add,
+    edge_add,
 };
 
 enum State
@@ -35,9 +64,9 @@ enum State
 
 struct Position
 {
-    int x;
-    int y;
-    int angle;
+    float x;
+    float y;
+    float angle;
 };
 
 volatile int data;
@@ -49,11 +78,82 @@ int previousNode;
 
 void updatePosition(int steps)
 {
-    position.x += steps * cos(position.angle) * DISTANCE_PER_STEP;
     position.y += steps * sin(position.angle) * DISTANCE_PER_STEP;
     telemetryJson["position"]["x"] = position.x;
     telemetryJson["position"]["y"] = position.y;
     stepsSinceLastNode += steps;
+}
+
+void updateAngle(int stepsR, int stepsL){
+    int angleDelta = 360*SEGWAY_WIDTH / (stepsL - stepsR) * DISTANCE_PER_STEP;
+    position.angle = position.angle+= angleDelta;
+    if(position.angle > 360)
+        position.angle -= 360;
+    else if(position.angle < 0)
+        position.angle += 360;
+}
+
+void navigate(){
+    int rightLDR = analogRead(ldrPin1); // 0-4095
+    int frontLDR = analogRead(ldrPin2);
+    int leftLDR = analogRead(ldrPin3);
+    int stepsL = 0;
+    int stepsR = 0;
+    if (rightLDR > minThreshold && leftLDR > minThreshold && frontLDR > frontThreshold)
+    {
+        // rotate until exited dead end
+        stepsL = -10;
+        stepsR = 10;
+    }
+    else if (rightLDR < minThreshold)
+    { //
+        // turn right
+        // adjust course so that threshold value is within range
+        // take account of turning angle if its beyond angle threshold it means its a full roation
+        //  depending on the degree of the turn its either a junciton or corner
+        //  if either genertae node using current rover position and update edge from previous node
+        stepsL = 10;
+        stepsR = 0;
+        position.angle += 3.342;
+    }
+
+    else if (frontLDR > frontThreshold && rightLDR > minThreshold)
+    {
+        // turn left
+        stepsL = 0;
+        stepsR = 10;
+        position.angle -= 3.342;
+    }
+    else if (leftLDR > maxThreshold)
+    {
+        stepsL= 10;
+        stepsR = 0;
+        position.angle += 3.342;
+    }
+    else if (rightLDR > minThreshold && rightLDR < maxThreshold)
+    {
+        // keep updating edge with time(millis) or distance(revolution)
+        // move forward
+        stepsL = 10;
+        stepsR = 10;
+        updatePosition(10);
+    }
+
+    else if (rightLDR > maxThreshold)
+    {
+        // adjust left
+        stepsL = 0;
+        stepsR = 10;
+        position.angle -= 3.342;
+    }
+
+    // Negated because clockwise
+    motorLeft.move(stepsL);
+    motorRight.move(-stepsR);
+    while(motorLeft.distanceToGo() != 0 || motorRight.distanceToGo() != 0){
+        motorLeft.run();
+        motorRight.run();
+    }
 }
 
 void setup()
@@ -91,7 +191,18 @@ void setup()
     telemetryJson["accelerometer"]["z"] = 0;
     telemetryJson["steps"] = 0;
     telemetryJson["state"] = "stop";
-    AddNode(); //
+    
+    // Initialize motor pins
+    pinMode(motorLeftStepPin, OUTPUT);
+    pinMode(motorLeftDirPin, OUTPUT);
+    pinMode(motorRightStepPin, OUTPUT);
+    pinMode(motorRightDirPin, OUTPUT);
+
+    // Configure motor properties
+    motorLeft.setMaxSpeed(1000);
+    motorLeft.setAcceleration(500);
+    motorRight.setMaxSpeed(1000);
+    motorRight.setAcceleration(500);
 }
 
 void loop()
@@ -122,6 +233,7 @@ void loop()
     {
         // Movement code here
     }
+    navigate();
 }
 
 String httpPOSTRequest(const char *url, const String payload)
@@ -169,10 +281,17 @@ String ServerRequest(Endpoint endpoint, const char *payload)
         return json;
     }
     break;
-    case map_update:
-        return httpPOSTRequest(SERVER_API_BASE MAP_ENDPOINT, payload);
+    case map_add:
+        return httpPOSTRequest(SERVER_API_BASE MAP_ADD_ENDPOINT, payload);
+        break;
+    case node_add:
+        return httpPOSTRequest(SERVER_API_BASE NODE_ADD_ENDPOINT, payload);
+        break;
+    case edge_add:
+        return httpPOSTRequest(SERVER_API_BASE EDGE_ADD_ENDPOINT, payload);
         break;
     }
+
 }
 
 // FIXME: NO IDEA IF THIS WILL WORK OR NOT THE API IS NOT DONE YET
@@ -185,7 +304,7 @@ void AddNode()
     doc["map_id"] = 1;
     String json;
     serializeJson(doc, json);
-    int nodeId = ServerRequest(map_update, json.c_str()).toInt();
+    int nodeId = ServerRequest(node_add, json.c_str()).toInt();
 
     // Connect the new node to the previous node
     if (nodeId != -1)
@@ -196,7 +315,7 @@ void AddNode()
         doc["target_node_id"] = nodeId;
         doc["weight"] = stepsSinceLastNode;
         serializeJson(doc, json);
-        ServerRequest(map_update, json.c_str());
+        ServerRequest(edge_add, json.c_str());
     }
     stepsSinceLastNode = 0;
 }
