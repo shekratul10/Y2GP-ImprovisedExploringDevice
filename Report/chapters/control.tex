@@ -8,12 +8,10 @@ When it comes to thinking about system requirements, it’s important to be mind
 
 One of the challenges faced was using the correct pins from the ESP32 as they had different specificities (referring to GPIO pins). Furthermore, being limited via the power of the battery meant that the speed and output power of the motors are limited to allow for enough voltage and current to all the other components. One of the ways the effect of this was minimised, was by adjusting the potentiometer values on the A4998 motor drivers to allow for a high voltage without compromising too much on current. 
 
-\newpage
-
 \subsection{Design Approach}
 \begin{wrapfigure}{l}{0.3\textwidth}
     \centerline{\includegraphics[width=0.28\textwidth]{images/balance.png}}
-    \caption{Inverted Pendulum}
+    \caption{Inverted Pendulum~\cite{ref:pendulum}}
     \label{fig:balance}
 \end{wrapfigure}
 The concept of a self-balancing Segway is derived heavily from the theory of an inverted pendulum. The primary aim of the control system is to balance this inverted pendulum to keep it in an upright pose by applying a force to the base of the segway, via torque produced by the wheels. This is clearly visualised below.
