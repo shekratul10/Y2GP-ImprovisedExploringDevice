@@ -1,0 +1,30 @@
+\section{Integration}
+
+Once all the individual systems were developed, they had to be integrated into the final system. As each subsystem was designed with scalability and expandability in mind, connecting them together was simply a matter of communication between them.
+
+\subsection{Inter-device Communication}
+As the camera sends information to the Nios II processor on the FPGA and the ESP32 communicates with the server over WiFi, a communication channel between the FPGA and the ESP32 is paramount. Initially, I2C was experimented as it is a simple interface and has good support in the ESP32 libraries, however the IP available for the FPGA only provided an I2C master device. The ESP32 does support communication as an I2C slave device, but it was not working correctly in testing. SPI was then chosen to be used as it is a simpler interface and there is good support for the ESP32 as a slave device.
+
+\subsection{SPI Bus}
+
+The serial peripheral interface (SPI) is a full-duplex master-slave interface with 4 wires. The 4 wires are:
+
+\begin{itemize}
+    \item \textbf{MOSI} -- Master Out Slave In
+    \item \textbf{MISO} -- Master In Slave Out
+    \item \textbf{SCLK} -- Serial Clock
+    \item \textbf{SS} -- Slave Select
+\end{itemize}
+
+The master device generates the clock signal and a high signal on MISO or MOSI represents a binary 1. This means that the interface communicates at 1 bit per clock cycle. SPI hardware is implemented with shift registers that can be made an arbitrary length, so long as each device agrees on a minimum. The data to be transferred is buffered into the shift register and then when the SS line goes low the shift register begins advancing pushing each bit every clock cycle, another shift register is used to receive data into.
+
+The Intel SPI FGA provides SPI hardware and an interface to the processor as an Avalon Memory Mapped slave which enables sending an arbitrary number of bytes over SPI through the hardware abstraction layer. [Altera SPI command] The IP can be configured with a shift register of 8-32 bits, 8 bits were chosen as there would be wasted time if less than 4 bytes were to be transmitted. The clock speed was chosen to be 12.5Mhz giving a theoretical maximum bitrate of 12Mbps. However, in practice the processor can’t buffer the data fast enough and so the effective throughput is limited to 2.4Mbps. 
+
+Espressif provide an SPI slave driver which can be configured to read the incoming data into a small memory buffer or, using direct memory access, into main data memory. Since the SPI transactions are smaller than 32 Bytes Espressif recommend using the default configuration without DMA. [ESP32 Slave driver docs]. The ESP32SPISlave Arduino library provides interfaces for this driver. The ESP32 queues an empty transaction onto the buffer and waits for the driver to trigger an interrupt signalling the start of a transaction, the library does this through the use of a slave.available() method that is captured in a while loop. The data buffers are emptied into a global variable and a flag is set to indicate new information. The main loop then acts accordingly.
+
+\subsection{WiFi Communication}
+
+The ESP32 has an onboard WiFi module, this enables transmission of information over the internet using the HTTPClient library. [HTTPCLCient library doc] The ESP32 stores an internal JSON document using the ArdunoJson library. This enables simple integration with the REST API through GET and POST requests to keep the server up to date with the latest telemetry or mapping data. The ESP32 is pre-loaded with the SSID and password of a local WiFi access point in order to connect to the internet.
+
+% Code snippets of final api calls
+

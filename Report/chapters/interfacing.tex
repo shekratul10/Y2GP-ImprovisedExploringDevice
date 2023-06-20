@@ -1,0 +1,20 @@
+\section{Interfacing}
+
+Communication between the FPGA and the ESP32.
+
+\subsection{Initial Design}
+The first attempt at interfacing the FPGA and the ESP32 was to use an I$^2$C interface.
+Quartus provides an I$^2$C master interface that could be used to communicate with the ESP32 as a slave device.
+There were issues with the ESP32 as a slave device, Espressif only recently added support for it
+and we couldn't reliably get it to work.
+
+\subsection{Final Design}
+The final design uses an SPI interface between the FPGA and the ESP32 with the FPGA as the master device.
+SPI can run at a very high clock speed and in testing was capable of transmitting at 12.5Mhz with a full duplex data rate of 
+12.5Mbit/s each way. This is more than enough for the telemetry data that is being sent between the FPGA and the ESP32.
+
+\subsection{Further Improvements}
+Due to the high data throughput of SPI there is a chance that the camera feed could be streamed to the ESP32 and then further to the web server. This would allow for server-side image processing for identifying walls in the maze which could be significantly more capable than
+the FPGA alone. This would also allow for the camera feed to be displayed on the web interface. However, this would require some form of compression as each frame is 640x480 with 8 bits per colour channel.
+This means each frame is $640 \times 480 \times 3 = 921600$ byes or 900Kb. This is far too large to be sent over the network in real time. A compression algorithm would need to be implemented to reduce the size of the image before it is sent to the server.
+This is possible with hardware H264 endcoding but would require a significant amount of work to implement.

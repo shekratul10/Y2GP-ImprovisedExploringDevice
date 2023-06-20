@@ -1,0 +1,37 @@
+
+\section{Specification}
+
+There were several guidelines and requirements when designing the autonomous balancing robot.
+The system must:
+\begin{enumerate}
+    \item Autonomously move through a maze without crossing an illuminated line.
+    \item Autonomously survey the layout of the maze and produce a map of the discovered layout, overlaid with the position of the robot and the shortest path through the maze.
+    \item Balance on two wheels.
+\end{enumerate}
+
+
+The autonomous balancing robot is assessed in the following ways.
+The system must be:
+\begin{enumerate}
+    \item Reliable and able to complete its task without human intervention.
+    \item Robustly and efficiently constructed.
+    \item Coded for:
+          \begin{enumerate}[label=\alph*.]
+              \item Usability
+              \item Testability
+              \item Maintainability
+              \item Scalability
+          \end{enumerate}
+\end{enumerate}
+
+
+
+Restrictions are also imposed on the project in the following ways.
+The permitted means of locating the robot within the maze are:
+\begin{enumerate}
+    \item Dead-reckoning based on accelerometer, gyroscope and wheel revolution counting.
+    \item Optical detection of the maze markings and up to three illuminated beacons by the robot.
+    \item Illuminated beacons shall be powered by a specified PV-array emulator and provided energy conversion modules.
+    \item The robot will use the provided FPGA-based camera system
+\end{enumerate}
+

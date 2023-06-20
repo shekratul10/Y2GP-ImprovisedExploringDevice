@@ -1,0 +1,50 @@
+\documentclass{article}[a4paper 12pt]
+\usepackage[hidelinks]{hyperref}
+\usepackage[includehead]{geometry}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage[none]{hyphenat}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{minted}
+\usepackage{amsmath}
+\usepackage[style=ieee]{biblatex}
+\addbibresource{references.bib}
+%\usepackage{showframe} %TODO: REMOVE
+\floatplacement{figure}{H}
+
+\begin{document}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{EEEBalanceBug}
+\fancyhead[R]{Improvised Exploring Device}
+\include{titlepage}
+
+\tableofcontents
+
+\newpage
+
+
+
+\input{chapters/abstract}
+\input{chapters/specification}
+\input{chapters/resources}
+\newpage
+\input{chapters/management.tex}
+\section{Web Application}
+\input{chapters/frontend.tex}
+\input{chapters/backend.tex}
+\input{chapters/control.tex}
+\newpage
+\input{chapters/power.tex}
+\input{chapters/vision.tex}
+\input{chapters/manufacturing.tex}
+\input{chapters/integration.tex}
+
+\section{References}
+\printbibliography[heading=none]
+
+\end{document}
