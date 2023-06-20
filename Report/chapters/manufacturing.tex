@@ -2,7 +2,11 @@
 \subsection{Circuit Design}
 A modular approach was used to construct the required circuit. Each of the components are tested individually before bringing them together. The circuit is shown as follows:
 
-% Circuit diagram
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/circuit-design.png}
+    \caption{}
+\end{figure}
 
 The power supply is chosen to be 3 parallel PV panels since only this configuration gives enough current. The power supply for series PV panels is too unstable to be implemented well in the design.
 
@@ -16,15 +20,32 @@ Although this result is far from the ideal circuit, this circuit will be used in
 
 Many different design concepts were considered when it came to designing the chassis. 
 
-% CHassis first draft
+% Chassis first draft
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/chassis-drawing1.png}
+    \caption{}
+\end{figure}
 
-This would be the simplest to build since it would only require one swivel wheel and not many changes are required to the existing chassis; just to make the wheels perfectly in the centre. However, it would be challenging to fit everything in such a tight narrow space without greatly widening the chassis. This would further prove to me even more difficult when it comes to debugging.
+This would be the simplest to build since it would only require one swivel wheel and not many changes are required to the existing chassis; just to make the wheels perfectly in the centre. However, it would be challenging to fit everything in such a tight narrow space widthout greatly widening the chassis. This would further prove to me even more difficult when it comes to debugging.
 
 %roomba design
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/chassis-drawing2.png}
+    \caption{}
+\end{figure}
 
 This design resembles that of an automatic vacuum and has the most aesthetic look if made correctly. It provides enough space for all components to fit appropriately. With a design with the centre of mass super close to the wheels and ground, the control system cannot be easily implemented all ends could easily touch the ground. This is further supported by the fact that there is virtually no height meaning very little to no inertia at the top. This would mean the gyroscope would have a hard time detecting changes in angle tilt. Furthermore, a circular design would prove to be impractical when it came to driving around on the field.
 
+\vspace{1cm}
+
 %triple tower design
+\begin{wrapfigure}{l}{0.4\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/chassis-drawing3.png}
+    \caption{}
+\end{wrapfigure}
 
 In the end, the triple tower design set up was chosen. This allowed a variable weight distribution via the use of nuts and threaded rods. This meant that when it came to testing, it was very convenient for us to change the heights of relevant parts to allow for an ideal control system. Making the tower very top heavy, resembled that of the heavy mass in an inverted pendulum. This modular design would ultimately save time and allow for a range of possibilities. Furthermore, this design would allow for quick and easy debugging without dismantling the whole system. 
 
@@ -42,10 +63,28 @@ Using this formula, it is known that a vague minimum torque required. From this,
 
 Therefore, as a next step, by reducing the mass diameter from M10 to M5, 75\verb|%| of the mass of the threaded rods would be eliminated. This means that the torque produced by the motors would be enough to take full advantage of the control system allowing for smooth operation. 
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/chassis-cad1.png}
+    \caption{}
+\end{figure}
+
 Fusion 360 was used to design the new chassis. A few changes were made based on the original design that was offered to make it better fit our requirements. Notably, the original wheel mounts were placed further apart were placed horizontally further apart with an offset in the Y-axis to allow for the wheels pivot to be in line with the centre of mass. 
 
 Having the battery on top was chosen to allow it to be "top heavy" referring to a configuration in an inverted pendulum design in which most of the mass is concentrated at the top, increasing the pendulum's potential to tip over. This imbalance has an impact on the system's stability, requiring precise control to keep the system upright. This design largely relies on inertia, which is the resistance of an object to changes in motion. It is more difficult to quickly adjust the pendulum's position due to the top-heavy configuration's high inertia, which derives from the concentrated mass at the top. As a result, strong control measures are required to stabilise the system and reduce its consequences.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/chassis-cad2.png}
+    \caption{}
+\end{figure}
+
 Combining all the levels gave us the following:
 
 % complete chassis
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/final-chassis.png}
+    \caption{}
+\end{figure}

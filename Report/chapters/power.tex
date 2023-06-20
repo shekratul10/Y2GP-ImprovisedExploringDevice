@@ -68,13 +68,13 @@ The main component of the energy system are the three LED beacons, which will be
 \begin{figure}
     \centering
     \begin{subfigure}[b]{.45\linewidth}
-        \includegraphics[width=\linewidth]{images/iv-3-load.png}
+        \includegraphics[width=\linewidth]{images/led-yellow.jpg}
     \end{subfigure}
     \begin{subfigure}[b]{.45\linewidth}
-        \includegraphics[width=\linewidth]{images/mppt-3-load.png}
+        \includegraphics[width=\linewidth]{images/led-blue.jpg}
     \end{subfigure}
     \begin{subfigure}[b]{.45\linewidth}
-        \includegraphics[width=\linewidth]{images/mppt-3-load.png}
+        \includegraphics[width=\linewidth]{images/led-red.jpg}
     \end{subfigure}
 \end{figure}
 
@@ -131,7 +131,7 @@ The result of the controller is that the input of LED driver could work up to 15
 \subsection{Initial Design}
 
 \begin{wrapfigure}{r}{0.4\textwidth}
-    %\includegraphics[width=0.38\textwidth]{images/led-parallel.png}
+    \includegraphics[width=0.38\textwidth]{images/all-leds.jpg}
 \end{wrapfigure}
 
 After testing out each of the LED drivers with LED lights, three of them are put together in parallel connect to the power supply. The test is operated at a voltage of 10V. All 3 of the LED beacons are successfully lit up. The next step is to the with an emulated PV panel with a power supply. Previously, the boost SMPS with PV panels and each of the LED beacons are tested separately and each of them are working as intended. When combined into a circuit, it is expected to light the LED beacons up. To emulate PV panels, the current limit is set to 0.7A and the voltage is changed from 4V to 5V.

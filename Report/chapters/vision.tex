@@ -28,7 +28,7 @@ The initial calibration without the beacons with objects of similar colours prov
 
 \begin{figure}
     \centering
-    %\includegraphics{images/beacon-detect}
+    \includegraphics{images/vision-demo.jpg}
     \caption{Beacon detection}
 \end{figure}
 
@@ -45,13 +45,14 @@ The design of the segway includes the integration of LDRs on each side, which ar
 \begin{figure}
     \centering
     \begin{subfigure}[b]{.45\linewidth}
-        %\includegraphics[width=0.45\linewidth]{images/ldr-graph}
+        \includegraphics[width=\linewidth]{images/ldr-graph.png}
         \caption{LDR response characteristics}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\linewidth}
-        %includegraphics[width=0.45\linewidth]{images/ldr-circuit}
+        \includegraphics[width=\linewidth]{images/ldr-circuit.png}
         \caption{LDR circuit diagram}
     \end{subfigure}
+    \caption{}
 \end{figure}
 
 Using a potential divider circuit, multiple resistor values were tested to measure light intensity variances as they move away from wall. A large spread of Arduinos’ measured values between varying distances from the light source (wall) was needed to set the necessary conditions for when to continue forward and when to turn, while also decreasing the margin of error.
@@ -106,19 +107,60 @@ The position during a straight line, assuming angle 0 is facing towards positive
 
 Three different types of light sensors are tested to see which was most suited for the task of navigating. A high sensitivity to light and a steady variance in light detected depending on distance from light source are needed in the design. A GL5528 photoresistor was tested first:
 
-%Photoresistor figure here
+%Photoresistor figure
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{.2\linewidth}
+        \includegraphics[width=\linewidth]{images/photoresistor.png}
+        \caption{Photoresistor}
+    \end{subfigure}
+    \hspace{2cm}
+    \begin{subfigure}[b]{.4\linewidth}
+        \includegraphics[width=\linewidth]{images/ldr-graph.png}
+        \caption{Phototransistor response characteristics}
+    \end{subfigure}
+    \caption{}
+\end{figure}
+
 
 The GL5528 photoresistor proved to have great results when it is paired up with a 510\(\Omega\) resistor in a potential divider circuit.
 
 An SFH 300 phototransistor was tested next, the idea behind choosing this one was that it would be able to detect light from more directions due to its design:
 
-%Phototransistor figure here
+%Phototransistor figure 
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.2\linewidth}
+        \includegraphics[width=\linewidth]{images/phototransistor.png}
+        \caption{Phototransistor}
+    \end{subfigure}
+    \hspace{2cm}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \includegraphics[width=\linewidth]{images/phototransistor-graph.png}
+        \caption{Phototransistor response characteristics}
+    \end{subfigure}
+    \caption{}
+\end{figure}
 
 The issue with the phototransistor was that the variance was not steady and it would barely detect anything if it was not immediately next to the light source.
 
 Finally, the last component that was tested was a photoresistor sensor module. The idea behind trying this was to save space on the breadboard as it did not require the use of a potential divider circuit:
 
-%Module figure here
+%Module figure
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.2\linewidth}
+        \includegraphics[width=\linewidth]{images/photomodule.png}
+        \caption{Photoresistor module}
+    \end{subfigure}
+    \hspace{2cm}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \includegraphics[width=\linewidth]{images/photomodule-graph.png}
+        \caption{Photoresistor module response characteristics}
+    \end{subfigure}
+    \caption{}
+\end{figure}
 
 Again, the issue with this was that it barely detected changes in conditions until the light source was very close. This performed better than the SFH 300 but worse than the GL5528. In the end, the GL5528 was chosen as it was the best suited for gauging its distance to the light source. This property would be heavily relied on in the navigation.
 
