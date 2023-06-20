@@ -1,14 +1,17 @@
 \section{Resources}
 To start off the project, various components were provided and some were given as time progress. Below is the record of the components given. (Please type descriptions of each of the components)
-FPGA board (FPGA Max DE-10 Lite)
-Camera module (D8M)
-WiFi microcontroller (ESP32)
-Inertial measurement unit (MPU6050)
-Stepper motors and drivers (NEMA-17 Stepper motors and A4988 Stepper Motor Drivers)
-\begin{enumerate}[label=--]
-    \item Built for precision.
-    \item Excellent Torque at low speed.
-    \item Constantly drawing max current.
-    \item Causing motor and driver circuits to build more heat. So worse for battery life.
 
-\end{enumerate}
+\subsection{FPGA board (FPGA Max DE-10 Lite)}
+The DE-10 Lite is built around the Altera MAX10 FPGA and features on-board SRAM and flash memory allowing for the FPGA to be blasted in-situ. The SRAM will be used as a frame buffer in this project and the on-board flash will store the software.
+
+\subsection{Camera module (D8M)}
+The D8M is an 8MP camera designed for the DE-10 Lite and uses the MIPI protocol to communicate. However, due to the limitations of our processing we are running at a resolution of 640*480. The camera is connected to the FPGA via a 40-pin ribbon cable.
+
+\subsection{WiFi microcontroller (ESP32)}
+A microcontroller by Espressif Systems with 2 Xtensa cores running at 240Mhz. The built in WiFi and Bluetooth radio allows for the device to access the internet and communicate with nearby devices. It provides many GPIO pins which allow for hardware expansion through support for I2C, UART, SPI and other communication protocols.
+
+\subsection{Inertial measurement unit (MPU6050)}
+It is a module with an accelerometer and a gyroscope. It helps to measure motion-related parameters. It provides accurate and very sensitive telemetry values which are perfect for a reliable control system.
+
+\subsection{Stepper motors and drivers (NEMA-17 Stepper motors and A4988 Stepper Motor Drivers)}
+The motors and drivers are the components that drive the segway to move. These were an ideal choice as they were built for precision and provide excellent torque characteristics at low speeds. However, they constantly draw maximum current causing motor and driver circuits to build more heat. Therefore, if power or efficiency were a concern, these components wouldn’t be as suitable.
