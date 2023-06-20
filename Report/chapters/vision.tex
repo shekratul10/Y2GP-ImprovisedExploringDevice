@@ -9,7 +9,7 @@ The requirements of this system are as follows:
     \item Coordinates of corners of the boxes must be stored and passed onto the FPGA
 \end{itemize}
 
-The sample code provided for the FPGA vision system was looked at as a starting point, mainly focusing on the starter image processor implemented in Verilog (EEE\verb|_|IMGPROC.v)~\cite{ref:eebalancebug}~\cite{ref:fpga_starter}. In this Verilog module, the 24-bit "sink\verb|_|data" input from the streaming sink is broken up into separate 8-bit wires: red, green and blue. These wires are used to determine the values assigned to the 1-bit "red\verb|_|detect", "blue\verb|_|detect", "orange\verb|_|detect" and "white\verb|_|detect" wires, with the first three wires required for beacon detection and the latter wire for lane detection. These Boolean values are determined by evaluating the individual 8-bit RGB values from the video feed, for each of the beacon colours (red, orange and blue) there are a range of RGB values which are acceptable for each colour [B]. For this reason, each of the red, green and blue wires were checked against threshold values as shown below:
+The sample code provided for the FPGA vision system was looked at as a starting point, mainly focusing on the starter image processor implemented in Verilog (EEE\verb|_|IMGPROC.v)~\cite{ref:eebalancebug}~\cite{ref:fpga_starter}. In this Verilog module, the 24-bit "sink\verb|_|data" input from the streaming sink is broken up into separate 8-bit wires: red, green and blue. These wires are used to determine the values assigned to the 1-bit "red\verb|_|detect", "blue\verb|_|detect", "orange\verb|_|detect" and "white\verb|_|detect" wires, with the first three wires required for beacon detection and the latter wire for lane detection. These Boolean values are determined by evaluating the individual 8-bit RGB values from the video feed, for each of the beacon colours (red, orange and blue) there are a range of RGB values which are acceptable for each colour~\cite{ref:rgbhsv}. For this reason, each of the red, green and blue wires were checked against threshold values as shown below:
 
 \begin{figure}
     \footnotesize
@@ -36,6 +36,51 @@ However, the image processor was unable to detect the object in its entirety due
 
 In order to address this issue, the colour detection was calibrated and tested with the LED beacons, where it was learned through collaboration with the power system sub-team that the brightness of the LEDs should be limited due to bright light being detected as white light, in addition to the fact that there may be some flashing in the LEDs powered by the PV cell/ supercapacitor. Using this information, the thresholds had to be changed to allow for more robust levels of detection, which required numerous cycles of trial and error (i.e. accounting for the various shades of red, blue or orange as brightness isn’t constant throughout the beacon).
 
+\begin{figure}
+    \centering
+    \includegraphics{images/vision-detection.jpg}
+    \caption{Yellow, blue and red beacons (from left to right)- Misdetection of red in yellow beacon}
+\end{figure}
+
+Due to the overlapping nature of the red and yellow colours, the distinction between red and yellow beacons was blurred when using RGB thresholds. This made RGB-HSV conversion an attractive alternative as it separates the brightness and colour saturation from the colour itself, which allows for more precise detection of colours as well as more simplified thresholds \cite{ref:colorspace}. Attempts were made at converting the colour scheme from RGB to HSV for the detection, the complexity (see appendix for conversion equations) of the implementation, which required multiplication of variable wire values, was time consuming and problematic. This unfortunately meant that it had to be abandoned and more careful calibration of RGB thresholds were to be used.
+
+The coordinates of each of the boxes were passed to the NIOS II processor using the memory mapped interface provided in the starter project \cite{ref:fpga_starter}. They are sent to the NIOS II processor, with separate state machines for information regarding each colour beacon, implemented in Verilog using . The image processor sends four things for each state machine, 
+
+The implementation of the beacon detection was successful in recognising each of the beacons, however there was an issue posed by the orange beacon as it cannot be detected in its entirety. This does not interfere greatly with the function of the segway regarding triangulation as the vision system still detects the centre of the beacon correctly, just not completely. Given more time, it would have been beneficial to the function of the rover if more time was invested in implementing conversion to HSV so that the beacons would be detected more accurately, reducing the risk of error in the coordinates of the centre of each beacon.
+
+\subsection{Triangulation}
+
+The coordinate information from the vision system is passed onto the ESP32, where it is combined with wheel odometry to determine a position for the segway to complement the dead reckoning to ensure accuracy in the localisation of the rover.
+
+\begin{figure}
+    \centering
+    \includegraphics{images/triangulation.jpg}
+    \caption{Diagram of maze with beacon}
+\end{figure}
+
+When the rover is placed in one of the corners, the coordinate of that corner is set to (0,0) and the three beacons are placed in the remaining corners outside the bounds of the maze. The vision system sends the top left and bottom right coordinates of the beacons it detects to the NIOS II processor (along with the colour detected), which then passes the data to the ESP32 to be processed by Arduino code. On the ESP32, the coordinates of the middle of each bounding box for each colour is calculated. The code on the ESP32 orders the wheels to rotate until the red beacon is at a certain x coordinate (the centre of the frame), after which the ESP32 instructs the segway to rotate clockwise until the x coordinate of the blue beacon reaches the same point of interest, at which point the total angle rotated is determined by a function which calculates values from the wheel odometry.  This is repeated from the blue to yellow beacon and finally the yellow to red. 
+
+The method of using angles between beacons transformed the task into a 3-point resection problem, two solutions of which were considered: ToTal~\cite{ref:6693716}, and Tienstra’s method. The ToTal method may have a faster execution time than Tienstra’s method~\cite{ref:6693716}, but is more complicated (refer to appendix) in its implementation, and thus the decision was made to use Tienstra’s method for implementation of the triangulation algorithm due to time constraints of the project. Tienstra’s method for localisation is given by figure \ref{fig:Tienstra}.
+
+\begin{figure}
+    \centering
+    \includegraphics{images/Tienstra.png}
+
+    \(E_p = \frac{(K1 \times E_a)+(K2 \times E_b)+(K3 \times E_c)}{K1 + K2 + K3} \)
+
+    \(N_p = \frac{(K1 \times N_a)+(K2 \times N_b)+(K3 \times N_c)}{K1 + K2 + K3} \)
+
+    \begin{equation}
+        \begin{split}
+        \text{Where, } K1 = 1 / (\cot(A) - \cot(\alpha)) \\
+            K2 = 1 / (\cot(B) - \cot(\beta)) \\
+            K3 = 1 / (\cot(C) - \cot(\gamma))
+        \end{split}
+    \end{equation}
+    \caption{Tienstra’s method for localisation}
+    \label{fig:Tienstra}
+\end{figure}
+
 \subsection{Navigation}
 
 The navigation system developed for the segway is a crucial part of its operation. The system has been designed to navigate autonomously through a maze environment, using a combination of Light-Dependent Resistors (LDRs), a camera, and a sophisticated wall-following algorithm. This paper will outline the techniques and technologies used in the construction of the navigation and mapping system.
@@ -59,7 +104,7 @@ Using a potential divider circuit, multiple resistor values were tested to measu
 
 The primary navigation algorithm employed is the right-wall following method, where the segway is programmed to follow the wall on its right side. The segway continuously checks the light intensity on its right-side LDR; if the intensity is high, implying the presence of a wall, it moves in a straight line. If the light intensity falls below the calibrated threshold, indicating the absence of a wall, it steers right until the light conditions are satisfied.
 
-Simultaneously, the LDRs also serve a dual purpose of helping to map the maze layout. Whenever the segway encounters a junction (a point where more than two paths intersect), the LDRs detect a sudden change in light intensity by the absence of at least two walls. This is recorded as a node in the maze's graphical representation. Each node is sent to a server for processing and storage. All other pathways, representing maze corridors, are marked as weighted edges between nodes and are similarly stored on the server.
+Simultaneously, the LDRs also serve a dual purpose of helping to map the maze layout. Whenever the rover encounters a junction (a point where more than two paths intersect), the LDRs detect a sudden change in light intensity and when at least 2 LDRs detect no light. This is recorded as a node in the maze's graphical representation. Each node is sent to a server for processing and storage. All other pathways, representing maze corridors, are marked as weighted edges between nodes and are similarly stored on the server.
 
 To aid the segway in maintaining accurate positioning data, coloured beacons are placed along the way. Each beacon has a pre-known location. The camera mounted on the segway recognizes these beacons and updates the segway's current location in the mapping system. This ensures a continuous update of the segway's current location in the maze, thus increasing the accuracy of the generated map.
 

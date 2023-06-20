@@ -1,5 +1,15 @@
 \section{Abstract}
 
-A balancing robot is required to navigate a maze autonomously. The arena is coloured black and surrounded by black curtains. Light strips are laid out on the arena that creates a maze.
-A prototype of the design should be produced and assessed in the arena based on the time it takes to solve the maze.
+A balancing robot is required to navigate a maze autonomously. The arena is coloured black and surrounded by black curtains. White LED strips are laid out on the arena to create a maze. The task given is to design a segway which can balance on 2 wheels and autonomously navigate the maze without colliding with the white LED strips. As it traverses the maze, a map should be built, with the current position and shortest path through the maze being displayed. 
 
+This project was broken down into several key components and tackled in subgroups decided upon as a team:
+\begin{itemize}
+    \item \textbf{Web application} --  A backend which receives telemetry data from the rover and produces a map of the maze given data and a frontend which displays all of these for the user to see clearly.
+    \item \textbf{Control system} -- To balance the rover and drive the motors for a given movement.
+    \item \textbf{Power delivery system} -- To power the LED beacons with sufficient brightness and constant power for beacon detection.
+    \item \textbf{Computer vision} -- Detects beacons and uses triangulation to accurately determine position on the mazeDetects beacons and uses triangulation to accurately determine position on the maze.
+    \item \textbf{Navigation and routing} -- Control the path of the rover ensuring it does not collide with walls and navigates through the maze.
+    \item \textbf{Integration} -- Joint effort by group to ensure that all the systems developed independently interact with each other smoothly for finished product.
+\end{itemize}
+
+These key components were designed with scalability and adaptability in mind so that while they were developed independently, they could be connected to complete the design. For example, the web API can handle multiple rovers with different IDs.

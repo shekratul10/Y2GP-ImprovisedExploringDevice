@@ -44,6 +44,40 @@ The PV panels are also connected to a boost switch mode power supply (SMPS) for 
 
 The results are as expected. The IV characteristic shows a plateau at lower voltages with around 0.65 mA and has a significant drop at larger than 5V. This results in an expected graph of power, which shows that the maximum output power would be around 4V to 5V.
 
+\subsection{Maximum Power Point Tracking}
+
+\begin{figure}
+    \footnotesize
+    \begin{minted}{python}
+power1 = vb * iL;
+power_diff = power1 - power0;
+power0 = power1;
+vb_diff = vb - vb_old;
+vb_old = vb;
+if (power_diff > 0){
+    if(vb_diff > 0){
+        open_loop=open_loop-0.001;
+    }
+    else{
+        open_loop=open_loop+0.001;
+    }
+}
+else{
+    if(vb_diff > 0){
+        open_loop=open_loop+0.001;
+    }
+    else{
+        open_loop=open_loop-0.001;
+    }
+}
+    \end{minted}
+    \caption{}
+    \label{code:pert_observe}
+\end{figure}
+
+Maximum power point tracking (MPPT) is used mainly to maximize the power output from the PV panels by adjusting the operating point. The algorithm continuously monitors the output voltage and current and adjusts the operating point. This ensures the system to harvest the maximum power from the PV panels for most of the conditions. This will negate small oscillations coming from the current supply due to weather conditions such as a cloud blocking the sun. The algorithm is implemented in a perturb and observe method~\cite{ref:mppt}. The code implemented is shown in figure \ref{code:pert_observe}. The code gets the current value and past value of voltage and current and compares them. When the power and voltage are both larger, it means that it has not reached it’s maximum power, and duty cycle is further increased. In the code, the duty cycle is decreased. This is correct since the PMOS is the boost SMPS reverses the operation. The algorithm ensures that the power in the DC grid will be as high as possible at any given time, given a steady brightness of the LED beacons as much as possible.
+
+
 \subsection{LED}
 
 The main component of the energy system are the three LED beacons, which will be essential to help the robot to navigate through the maze. There are three different colours of LED, red, blue and yellow. The exact ratings of the LEDs are not given except for 1W. Preliminary testing is needed to find out the diode drop, maximum voltage and current of each colour of the LEDs. Initially the LED beacons are run from a power supply unit at a voltage of 2V and the current limit to approximately 50mA. After that, the voltage limit is brought up until the voltage will rise to a fixed value. That value is the voltage drop of the diode. After that, the current is brought up such that the diode consumes 0.9W. That will be the expected maximum brightness of the LED. The voltage drop at lower current levels are also plotted for reference. The maximum operating point is purposedly tested at 0.9W. This prevents unexpected situations that will break the LEDs. Data is taken from the display of the power supply unit. The experimental results are in figure \ref{tbl:led}.
@@ -67,15 +101,16 @@ The main component of the energy system are the three LED beacons, which will be
 
 \begin{figure}
     \centering
-    \begin{subfigure}[b]{.45\linewidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \includegraphics[width=\linewidth]{images/led-yellow.jpg}
     \end{subfigure}
-    \begin{subfigure}[b]{.45\linewidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \includegraphics[width=\linewidth]{images/led-blue.jpg}
     \end{subfigure}
-    \begin{subfigure}[b]{.45\linewidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \includegraphics[width=\linewidth]{images/led-red.jpg}
     \end{subfigure}
+    \caption{LED Beacons}
 \end{figure}
 
 After the initial testing of the LEDs, each of them is connected to a separate LED driver, which is a buck SMPS. It controls how much current can flow through into the LED and prevents it from breaking. For better and stable control of the output from the LED driver, closed-loop buck SMPS is chosen for the LED driver. The advantage of a closed-loop controller is that the output voltage is regulated at a desired value by our command and it does not vary with output current when compared to open-loop buck SMPS.
