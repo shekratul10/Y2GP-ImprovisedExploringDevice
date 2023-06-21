@@ -20,20 +20,22 @@ const char *pwd = "testing123";
 #define MAP_ADD_ENDPOINT "/map/add"
 #define NODE_ADD_ENDPOINT "/map/add_node"
 #define EDGE_ADD_ENDPOINT "/map/add_edge"
-#define DISTANCE_PER_STEP 0.102101761 //cm
-#define SEGWAY_WIDTH 17.5 //cm
-#define STEP_INCREMENT 10
+#define DISTANCE_PER_STEP 0.102101761 // cm
+#define SEGWAY_WIDTH 17.5             // cm
+#define STEP_INCREMENT 20
 #define MICROSTEP_FACTOR 16
 
 const int ldrPin1 = 25;
 const int ldrPin2 = 33;
-const int ldrPin3 =  32;
-// const int ldrPin4 = ;
+const int ldrPin3 = 32;
+const int ldrPin4 = 35;
 
 // LDR thresholds
-const int maxThreshold = 590;
-const int minThreshold = 180;
-const int frontThreshold = 360;
+const int maxThreshold = 800;
+const int minThreshold = 300;
+const int northThreshold = 360;
+const int eastminThreshold = 900;
+const int eastmaxThreshold = 1000;
 
 // Motor pin definitions
 const int motorLeftStepPin = 26;
@@ -47,6 +49,7 @@ const int stepDelay = 200;
 // Create instances of AccelStepper for the two motors
 AccelStepper motorLeft(AccelStepper::DRIVER, motorLeftStepPin, motorLeftDirPin);
 AccelStepper motorRight(AccelStepper::DRIVER, motorRightStepPin, motorRightDirPin);
+bool deadEndLatch = false;
 
 enum Endpoint
 {
@@ -61,8 +64,16 @@ enum State
 {
     STOP,
     START,
-    MAPPING,
-    SENDING_NODE,
+    DEAD_END,
+    RIGHT_TURN,
+    RIGHT_LATCH,
+    RIGHT_TURN_LATCH,
+    FORWARD_LATCH,
+    RIGHT_ADJUST,
+    LEFT_TURN,
+    LEFT_ADJUST,
+    ROTATE_RIGHT,
+    FORWARD
 };
 
 volatile int stepsL = 0;
@@ -72,11 +83,11 @@ struct Position
 {
     float x;
     float y;
-    float angle; //Radians +ve is clockwise 0 is facing positive y axis
+    float angle; // Radians +ve is clockwise 0 is facing positive y axis
 };
 
 // All these are volatile to prevent the compiler from optimizing and buffering them
-volatile int data; //SPI data
+volatile int data; // SPI data
 volatile bool spi_data_flag = false;
 volatile Position position;
 volatile int stepsSinceLastNode;
@@ -92,73 +103,140 @@ void updatePosition(int steps)
     stepsSinceLastNode += steps;
 }
 
-void updateAngle(int stepsR, int stepsL){
-    float angleDelta = (stepsL - stepsR) * DISTANCE_PER_STEP / SEGWAY_WIDTH; //Clockwise is positive
+void updateAngle(int stepsR, int stepsL)
+{
+    float angleDelta = (stepsL - stepsR) * DISTANCE_PER_STEP / SEGWAY_WIDTH; // Clockwise is positive
     position.angle = position.angle += angleDelta;
-    if(position.angle > 360)
+    if (position.angle > 360)
         position.angle -= 360;
-    else if(position.angle < 0)
+    else if (position.angle < 0)
         position.angle += 360;
     position.x += sin(angleDelta);
     position.y += cos(angleDelta);
 }
 
-void navigate(){
-    int rightLDR = analogRead(ldrPin1); // 0-4095
-    int frontLDR = analogRead(ldrPin2);
-    int leftLDR = analogRead(ldrPin3);
+void navigate()
+{
+    int northeastLDR = analogRead(ldrPin1); // 0-4095
+    int northLDR = analogRead(ldrPin2);
+    int northwestLDR = analogRead(ldrPin3);
+    int eastLDR = analogRead(ldrPin4);
+
+    // State machine transition
+    switch (state)
+    {
+    case FORWARD:
+        // Transition
+        if (northLDR > northThreshold && northwestLDR > 200 && northeastLDR > minThreshold)
+        {
+            state = DEAD_END;
+        }
+        else if (northeastLDR < minThreshold && eastLDR < eastminThreshold)
+        {
+            state = RIGHT_LATCH;
+        }
+        else if (northLDR > northThreshold && northeastLDR > minThreshold)
+        {
+            state = LEFT_TURN;
+        }
+        else if (northLDR > maxThreshold && northeastLDR < minThreshold){
+            state = ROTATE_RIGHT;
+        }
+        else if (northwestLDR > maxThreshold)
+        {
+            state = RIGHT_ADJUST;
+        }
+        else if (northeastLDR > maxThreshold)
+        {
+            state = LEFT_ADJUST;
+        }
+        stepsL = STEP_INCREMENT * MICROSTEP_FACTOR;
+        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
+        updatePosition(stepsL);
+        break;
+    case RIGHT_LATCH:
+        // State transition to un-latch a right turn
+        if (northeastLDR >= minThreshold)
+        {
+            state = FORWARD;
+        }
+        if (northwestLDR > maxThreshold || northLDR > northThreshold)
+        {
+            state = RIGHT_TURN_LATCH;
+        }
+        else if (eastLDR > eastmaxThreshold)
+        {
+            state = FORWARD_LATCH;
+        }
+        break;
+    case RIGHT_TURN_LATCH:
+        if (!(northwestLDR > maxThreshold || northLDR > northThreshold))
+        {
+            state = RIGHT_LATCH;
+        }
+        break;
+    case FORWARD_LATCH:
+        if (eastLDR <= eastmaxThreshold)
+        {
+            state = RIGHT_LATCH;
+        }
+        break;
+    case DEAD_END:
+        if (northLDR < northThreshold)
+        {
+            state = FORWARD;
+        }
+        break;
+    case STOP: //stay stopped unless set externally
+        state = STOP;
+        break;
+    default: // Always try to move forward
+        state = FORWARD;
+        break;
+    }
+    // State machine control outputs
+    switch (state)
+    {
+    case FORWARD:
+    case FORWARD_LATCH:
+        stepsR = STEP_INCREMENT;
+        stepsL = STEP_INCREMENT;
+        updatePosition(stepsR);
+        break;
+    case DEAD_END:
+        stepsR = STEP_INCREMENT;
+        stepsL = -STEP_INCREMENT;
+        position.angle -= STEP_INCREMENT * DISTANCE_PER_STEP / (SEGWAY_WIDTH / 2);
+        break;
+    case RIGHT_TURN_LATCH:
+    case RIGHT_TURN:
+    case RIGHT_ADJUST:
+        stepsR = 0;
+        stepsL = STEP_INCREMENT;
+        updateAngle(stepsR,stepsL);
+        break;
+    case RIGHT_LATCH:
+        stepsR = STEP_INCREMENT / 20;
+        stepsL = STEP_INCREMENT;
+        updateAngle(stepsR,stepsL);
+        break;
+    case LEFT_ADJUST:
+    case LEFT_TURN:
+        stepsR = STEP_INCREMENT;
+        stepsL = 0;
+        updateAngle(stepsR,stepsL);
+        break;
+    case ROTATE_RIGHT:
+        stepsR = - STEP_INCREMENT;
+        stepsL = STEP_INCREMENT;
+        position.angle += STEP_INCREMENT * DISTANCE_PER_STEP / (SEGWAY_WIDTH / 2);
+        break;
+    default: //Fail safe and stop
+        stepsR = 0;
+        stepsL = 0;
+        break;
+    }
     
-    // Initialise at 0
-    stepsL = 0;
-    stepsR = 0;
-    if (rightLDR > minThreshold && leftLDR > minThreshold && frontLDR > frontThreshold)
-    {
-        // rotate until exited dead end
-        stepsL = -STEP_INCREMENT * MICROSTEP_FACTOR; //Microstep factor as each step is a fraction of a normal step
-        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
-
-    }
-    else if (rightLDR < minThreshold)
-    { //
-        // turn right
-        // adjust course so that threshold value is within range
-        // take account of turning angle if its beyond angle threshold it means its a full roation
-        //  depending on the degree of the turn its either a junciton or corner
-        //  if either genertae node using current rover position and update edge from previous node
-        stepsL = STEP_INCREMENT * MICROSTEP_FACTOR;
-        stepsR = 0;
-    }
-
-    else if (frontLDR > frontThreshold && rightLDR > minThreshold)
-    {
-        // turn left
-        stepsL = 0;
-        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
-        position.angle -= 3.342;
-    }
-    else if (leftLDR > maxThreshold)
-    {
-        stepsL= STEP_INCREMENT * MICROSTEP_FACTOR;
-        stepsR = 0;
-        position.angle += 3.342;
-    }
-    else if (rightLDR > minThreshold && rightLDR < maxThreshold)
-    {
-        // keep updating edge with time(millis) or distance(revolution)
-        // move forward
-        stepsL = STEP_INCREMENT * MICROSTEP_FACTOR;
-        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
-        updatePosition(STEP_INCREMENT);
-    }
-
-    else if (rightLDR > maxThreshold)
-    {
-        // adjust left
-        stepsL = 0;
-        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
-    }
-    updateAngle(stepsR, stepsL); 
-
 }
 
 void setup()
@@ -202,8 +280,8 @@ void setup()
     Serial.println("Getting ID from the server");
     ServerRequest(telemetry_add, "");
     Serial.print("ID: ");
-    serializeJson(telemetryJson["id"],Serial);
-    
+    serializeJson(telemetryJson["id"], Serial);
+
     // Initialize motor pins
     pinMode(motorLeftStepPin, OUTPUT);
     pinMode(motorLeftDirPin, OUTPUT);
@@ -211,16 +289,18 @@ void setup()
     pinMode(motorRightDirPin, OUTPUT);
 
     // Configure motor properties
-    motorLeft.setMaxSpeed(1000);
+    motorLeft.setMaxSpeed(1000 * MICROSTEP_FACTOR);
     motorLeft.setAcceleration(500);
-    motorRight.setMaxSpeed(1000);
+    motorLeft.setPinsInverted(true); // Right motor is inverted due to symmetry
+    motorRight.setMaxSpeed(1000 * MICROSTEP_FACTOR);
     motorRight.setAcceleration(500);
 }
 
 void loop()
 {
     // if there is no SPI transaction in queue, add transaction
-    if (slave.remained() == 0){
+    if (slave.remained() == 0)
+    {
         slave.queue(spi_slave_rx_buf, spi_slave_tx_buf, BUFFER_SIZE);
     }
     while (slave.available())
@@ -247,21 +327,23 @@ void loop()
         navigate();
         moveMotors();
     }
-    
+
     // Send telemetry data to server
     ServerRequest(telemetry_update, "");
 }
 
-void moveMotors(){
-    motorLeft.move(stepsL);
-    motorRight.move(-stepsR);
-    while(motorLeft.distanceToGo() != 0 || motorRight.distanceToGo() != 0){
-        motorLeft.run();
-        motorRight.run();
+void moveMotors()
+{
+    motorLeft.move(stepsL * MICROSTEP_FACTOR);
+    motorRight.move(stepsR * MICROSTEP_FACTOR);
+    while (motorLeft.distanceToGo() != 0 || motorRight.distanceToGo() != 0)
+    {
+        motorLeft.runSpeed();
+        motorRight.runSpeed();
     }
 }
 
-char* httpPOSTRequest(const char *url, char* payload)
+char *httpPOSTRequest(const char *url, char *payload)
 {
     WiFiClient client;
     HTTPClient http;
@@ -292,7 +374,7 @@ char* httpPOSTRequest(const char *url, char* payload)
     return "";
 }
 
-char* ServerRequest(Endpoint endpoint, char *payload)
+char *ServerRequest(Endpoint endpoint, char *payload)
 {
     switch (endpoint)
     {
@@ -300,7 +382,7 @@ char* ServerRequest(Endpoint endpoint, char *payload)
     {
         char json[128];
         serializeJson(telemetryJson, json);
-        char* resp;
+        char *resp;
         resp = httpPOSTRequest(SERVER_API_BASE TELEMETRY_ENDPOINT, json);
         if (json == "")
             return "";
@@ -313,7 +395,7 @@ char* ServerRequest(Endpoint endpoint, char *payload)
     {
         char json[128];
         serializeJson(telemetryJson, json);
-        char* resp;
+        char *resp;
         resp = httpPOSTRequest(SERVER_API_BASE TELEMETRY_ENDPOINT, json);
         if (json == "")
             return "";
@@ -331,7 +413,6 @@ char* ServerRequest(Endpoint endpoint, char *payload)
         return httpPOSTRequest(SERVER_API_BASE EDGE_ADD_ENDPOINT, payload);
         break;
     }
-
 }
 
 // FIXME: NO IDEA IF THIS WILL WORK OR NOT THE API IS NOT DONE YET
@@ -342,9 +423,9 @@ void AddNode()
     doc["x"] = position.x;
     doc["y"] = position.y;
     doc["map_id"] = 1;
-    char json[128]; 
+    char json[128];
     serializeJson(doc, json);
-    int nodeId = std::stoi(ServerRequest(node_add, json)); //Node ID should be the response
+    int nodeId = std::stoi(ServerRequest(node_add, json)); // Node ID should be the response
 
     // Connect the new node to the previous node
     if (nodeId != -1)
