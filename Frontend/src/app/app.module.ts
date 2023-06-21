@@ -18,6 +18,7 @@ import { MatFormFieldModule} from '@angular/material/form-field'
 import { MatInputModule} from '@angular/material/input'
 
 
+
 const routes: Routes = [
   { path: '', component: FrontpageComponent },
   { path: 'console', component: ConsoleComponent },
@@ -46,7 +47,7 @@ const routes: Routes = [
     HttpClientJsonpModule,
     FormsModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
     
   ],
   providers: [

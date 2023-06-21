@@ -12,6 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'
+import { MatIconModule} from '@angular/material/icon'
 
 const routes: Routes = [
   { path: '', component: DashboardComponent }
@@ -33,7 +34,7 @@ const routes: Routes = [
     MatButtonModule,
     MatSlideToggleModule,
     FormsModule,
-
+    MatIconModule
   ]
 })
 export class DashboardModule { }

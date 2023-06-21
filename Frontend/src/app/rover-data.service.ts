@@ -25,8 +25,9 @@ export class RoverDataService {
   }
 
   // Local telemetry and map store
-  private telemetry:Telemetry = { id:1,
+  private telemetry:Telemetry = { id:-1,
                                   position:{x:0,y:0},
+                                  angle:0,
                                   accelerometer:{x:0,y:0,z:0},
                                   gyroscope:{x:0,y:0,z:0},
                                   steps:0,
@@ -58,6 +59,10 @@ export class RoverDataService {
     return this.telemetry;
   }
 
+  public forceUpdate(){
+    this.updateData();
+  }
+
   public getMap(){
     return this.map;
   }
@@ -67,7 +72,7 @@ export class RoverDataService {
   public roverMapUpdate = new EventEmitter();
 
   private getTelemetryFromServer(){
-    return this.http.get<Telemetry>(`${environment.apiBaseUrl}/api/telemetry`,{params:{id:this.telemetry.id}});
+    return this.http.get<Telemetry>(`${environment.apiBaseUrl}/api/telemetry`,{params:{id:this.settingsServe.settings.roverId}});
   }
 
   private getRoverMapFromServer(){
@@ -115,8 +120,8 @@ export type RoverMap = {
 
 export type MapEdge = {
   id:number;
-  source_node_id:number;
-  target_node_id:number;
+  source:number;
+  target:number;
   weight:number;
 }
 
@@ -141,6 +146,7 @@ export type Command = "start" | "stop";
 export interface Telemetry{
   id:number;
   position:Position;
+  angle:number;
   accelerometer:xyzValue;
   gyroscope:xyzValue;
   steps:number,

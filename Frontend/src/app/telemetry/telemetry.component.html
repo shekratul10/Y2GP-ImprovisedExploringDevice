@@ -1,5 +1,11 @@
 <mat-card>
-<mat-card-title>Telemetry</mat-card-title>
+<mat-card-title>
+    Telemetry
+    <button mat-icon-button (click)="this.roverData.forceUpdate()">
+        <mat-icon>refresh</mat-icon>
+    </button>
+</mat-card-title>
+
 <div *ngIf="!roverData.LoS">
     <ul>
         <h3>Position:</h3>
@@ -7,6 +13,7 @@
         <li>
             <p>X: {{telemetry.position.x.toFixed(2)}}</p>
             <p>Y: {{telemetry.position.y.toFixed(2)}}</p>
+            <p>Angle: {{telemetry.angle?.toFixed(2)}} rads</p>
         </li>
         </ul>
         <h3>Accelerometer:</h3>
