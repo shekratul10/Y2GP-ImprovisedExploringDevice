@@ -75,7 +75,7 @@ export class RoverDataService {
   }
 
   public sendCommand(com:Command){
-    this.http.post(`${environment.apiBaseUrl}/api/cmd`, com);
+    this.http.post(`${environment.apiBaseUrl}/api/cmd`, {state:com});
   }
 
   //TODO: Might separate these into independent auto updaters
