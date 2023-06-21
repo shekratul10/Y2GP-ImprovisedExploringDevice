@@ -1,9 +1,8 @@
 from flask import render_template, request, jsonify
 from pybackend import app, db
 from pybackend.models import Map, Rover, Node, Edge
-
+from pybackend.util import shortestPath
 import json
-import numpy as np
 
 
 
@@ -12,7 +11,7 @@ def index():
     try:
         return render_template('index.html')
     except Exception as e:
-        return 'An error occurred while retrieving data from the database.'
+        return 'An error occurred while loading the page.'
     
 @app.route('/api/telemetry', methods=['GET']) # retrieves the telemetry from the rover
 def getTelemetry():
@@ -33,24 +32,21 @@ def getMap():
     try:
         id = request.args.get('id')
 
-        nodes = Node.query.filter_by(id=id).first()
-        edges = Edge.query.filter_by(id=id).first()
+        nodes = Node.query.filter_by(map_id=id).all()
+        edges = Edge.query.filter_by(map_id=id).all()
 
-        # Prepare the graph data structure
         graph_data = {
             'nodes': [],
             'edges': []
         }
 
-        # Add nodes to the graph data
         for node in nodes:
             node_data = {
                 'id': node.id,
-                'position': {'x': node.x, 'y': node.x}
+                'position': {'x': node.x, 'y': node.y}
             }
             graph_data['nodes'].append(node_data)
 
-        # Add edges to the graph data
         for edge in edges:
             edge_data = {
                 'id': edge.id,
@@ -61,10 +57,45 @@ def getMap():
             }
             graph_data['edges'].append(edge_data)
 
-        # Return the graph data as a JSON response
-        return jsonify(graph_data)
+        return jsonify(graph_data)   
+    except Exception as e:
+       return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
+    
+@app.route('/api/map/shortestpath', methods=['GET'], endpoint='get_shortest_path') # retrieves processed map form rover
+def getShortestPath():
+    try:
+        map_id = request.args.get('map_id')
+        end_id = request.args.get('end_id')
+        start_id = request.args.get('start_id')
 
-       
+        nodes = Node.query.filter_by(map_id=map_id).all()
+        edges = Edge.query.filter_by(map_id=map_id).all()
+
+        graph_data = {
+            'nodes': [],
+            'edges': []
+        }
+
+        for node in nodes:
+            node_data = {
+                'id': node.id,
+                'position': {'x': node.x, 'y': node.y}
+            }
+            graph_data['nodes'].append(node_data)
+
+        for edge in edges:
+            edge_data = {
+                'id': edge.id,
+                'source': edge.source_node_id,
+                'target': edge.target_node_id,
+                'weight': edge.weight
+                
+            }
+            graph_data['edges'].append(edge_data)
+
+        dist, path = shortestPath(graph_data, int(start_id), int(end_id))
+
+        return jsonify({"distances": dist, "shortest path": path})   
     except Exception as e:
        return { "status": "error", "type": type(e).__name__, "message": str(e)}, 400
 
@@ -84,7 +115,7 @@ def newTelemetry():
         db.session.add(rover)
         db.session.commit() 
 
-        return {"status": "sucess", "message": f"sucessfully initialised Rover with id={rover.id}", "id":f"{rover.id}"}), 200
+        return {"status": "sucess", "message": f"sucessfully initialised Rover with id={rover.id}", "id":f"{rover.id}"}, 200
     except KeyError as e:
         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
     except Exception as e:
@@ -132,7 +163,7 @@ def addMap():
        db.session.add(map)
        db.session.commit() 
 
-       return map.id
+       return jsonify({"status": "success", "message": f"successfully initilaised map", "id": map.id}), 200
     except KeyError as e:
         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
     except Exception as e:
@@ -152,7 +183,7 @@ def addNode():
        db.session.add(node)
        db.session.commit() 
 
-       return node.id
+       return jsonify({"status": "success", "message": f"successfully initilaised node", "id": node.id}), 200
     except KeyError as e:
         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
     except Exception as e:
@@ -172,7 +203,7 @@ def addEdge():
        db.session.add(edge)
        db.session.commit() 
 
-       return 200
+       return jsonify({"status": "success", "message": f"successfully initilaised edge", "id": edge.id}), 200
     except KeyError as e:
         return jsonify({"status": "error", "message": f"missing key: {str(e)}"}), 400
     except Exception as e:

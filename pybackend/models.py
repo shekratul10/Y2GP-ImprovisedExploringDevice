@@ -7,7 +7,6 @@ class Map(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
-    # Add any additional fields as needed
 
     def __repr__(self):
         return f"Map({self.id}, {self.name})"
@@ -19,7 +18,6 @@ class Node(db.Model):
     x = db.Column(db.Integer)
     y = db.Column(db.Integer)
     map_id = db.Column(db.Integer, db.ForeignKey('maps.id'))
-    # Add any additional fields as needed
 
     map = db.relationship('Map', backref='nodes')
 
@@ -34,7 +32,6 @@ class Edge(db.Model):
     target_node_id = db.Column(db.Integer, db.ForeignKey('nodes.id'))
     weight = db.Column(db.Float)
     map_id = db.Column(db.Integer, db.ForeignKey('maps.id'))
-    # Add any additional fields as needed
 
     source_node = db.relationship('Node', foreign_keys=[source_node_id])
     target_node = db.relationship('Node', foreign_keys=[target_node_id])
@@ -75,18 +72,6 @@ class Rover(db.Model):
     def __repr__(self):
         return '<Rover %s, %s, %s, %s, %s>' % (self.position, self.accelerometer, self.gyroscope , self.steps, self.state)
     
-class Path(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    directions = db.Column(db.String(255), nullable=False)
-
-    def __init__(self, directions):
-        self.directions = json.dumps(directions)
-
-    def get_directions(self):
-        return json.loads(self.directions)
-    
-    def __repr__(self):
-        return '<Path %r>' % self.directions
     
 
 
