@@ -10,18 +10,20 @@ uint8_t spi_slave_tx_buf[BUFFER_SIZE];
 uint8_t spi_slave_rx_buf[BUFFER_SIZE];
 
 ESP32SPISlave slave;
-DynamicJsonDocument telemetryJson(2048);
-StaticJsonDocument<256> commandJson; // Incoming commands from the server
+StaticJsonDocument<256> telemetryJson;
+StaticJsonDocument<128> commandJson; // Incoming commands from the server
 
 const char *ssid = "H-P7";
 const char *pwd = "testing123";
-#define SERVER_API_BASE "13.41.162.40"
+#define SERVER_API_BASE "13.40.214.221"
 #define TELEMETRY_ENDPOINT "/telemetry/update"
 #define MAP_ADD_ENDPOINT "/map/add"
 #define NODE_ADD_ENDPOINT "/map/add_node"
 #define EDGE_ADD_ENDPOINT "/map/add_edge"
 #define DISTANCE_PER_STEP 0.102101761 //cm
 #define SEGWAY_WIDTH 17.5 //cm
+#define STEP_INCREMENT 10
+#define MICROSTEP_FACTOR 16
 
 const int ldrPin1 = 25;
 const int ldrPin2 = 33;
@@ -49,6 +51,7 @@ AccelStepper motorRight(AccelStepper::DRIVER, motorRightStepPin, motorRightDirPi
 enum Endpoint
 {
     telemetry_update,
+    telemetry_add,
     map_add,
     node_add,
     edge_add,
@@ -62,14 +65,18 @@ enum State
     SENDING_NODE,
 };
 
+volatile int stepsL = 0;
+volatile int stepsR = 0;
+
 struct Position
 {
     float x;
     float y;
-    float angle;
+    float angle; //Radians +ve is clockwise 0 is facing positive y axis
 };
 
-volatile int data;
+// All these are volatile to prevent the compiler from optimizing and buffering them
+volatile int data; //SPI data
 volatile bool spi_data_flag = false;
 volatile Position position;
 volatile int stepsSinceLastNode;
@@ -78,32 +85,38 @@ int previousNode;
 
 void updatePosition(int steps)
 {
-    position.y += steps * sin(position.angle) * DISTANCE_PER_STEP;
+    position.y += steps * cos(position.angle) * DISTANCE_PER_STEP;
+    position.x += steps * sin(position.angle) * DISTANCE_PER_STEP;
     telemetryJson["position"]["x"] = position.x;
     telemetryJson["position"]["y"] = position.y;
     stepsSinceLastNode += steps;
 }
 
 void updateAngle(int stepsR, int stepsL){
-    int angleDelta = 360*SEGWAY_WIDTH / (stepsL - stepsR) * DISTANCE_PER_STEP;
-    position.angle = position.angle+= angleDelta;
+    float angleDelta = (stepsL - stepsR) * DISTANCE_PER_STEP / SEGWAY_WIDTH; //Clockwise is positive
+    position.angle = position.angle += angleDelta;
     if(position.angle > 360)
         position.angle -= 360;
     else if(position.angle < 0)
         position.angle += 360;
+    position.x += sin(angleDelta);
+    position.y += cos(angleDelta);
 }
 
 void navigate(){
     int rightLDR = analogRead(ldrPin1); // 0-4095
     int frontLDR = analogRead(ldrPin2);
     int leftLDR = analogRead(ldrPin3);
-    int stepsL = 0;
-    int stepsR = 0;
+    
+    // Initialise at 0
+    stepsL = 0;
+    stepsR = 0;
     if (rightLDR > minThreshold && leftLDR > minThreshold && frontLDR > frontThreshold)
     {
         // rotate until exited dead end
-        stepsL = -10;
-        stepsR = 10;
+        stepsL = -STEP_INCREMENT * MICROSTEP_FACTOR; //Microstep factor as each step is a fraction of a normal step
+        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
+
     }
     else if (rightLDR < minThreshold)
     { //
@@ -112,21 +125,20 @@ void navigate(){
         // take account of turning angle if its beyond angle threshold it means its a full roation
         //  depending on the degree of the turn its either a junciton or corner
         //  if either genertae node using current rover position and update edge from previous node
-        stepsL = 10;
+        stepsL = STEP_INCREMENT * MICROSTEP_FACTOR;
         stepsR = 0;
-        position.angle += 3.342;
     }
 
     else if (frontLDR > frontThreshold && rightLDR > minThreshold)
     {
         // turn left
         stepsL = 0;
-        stepsR = 10;
+        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
         position.angle -= 3.342;
     }
     else if (leftLDR > maxThreshold)
     {
-        stepsL= 10;
+        stepsL= STEP_INCREMENT * MICROSTEP_FACTOR;
         stepsR = 0;
         position.angle += 3.342;
     }
@@ -134,38 +146,34 @@ void navigate(){
     {
         // keep updating edge with time(millis) or distance(revolution)
         // move forward
-        stepsL = 10;
-        stepsR = 10;
-        updatePosition(10);
+        stepsL = STEP_INCREMENT * MICROSTEP_FACTOR;
+        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
+        updatePosition(STEP_INCREMENT);
     }
 
     else if (rightLDR > maxThreshold)
     {
         // adjust left
         stepsL = 0;
-        stepsR = 10;
-        position.angle -= 3.342;
+        stepsR = STEP_INCREMENT * MICROSTEP_FACTOR;
     }
+    updateAngle(stepsR, stepsL); 
 
-    // Negated because clockwise
-    motorLeft.move(stepsL);
-    motorRight.move(-stepsR);
-    while(motorLeft.distanceToGo() != 0 || motorRight.distanceToGo() != 0){
-        motorLeft.run();
-        motorRight.run();
-    }
 }
 
 void setup()
 {
     Serial.begin(115200);
 
+    // Enable SPI for FPGA
     slave.setDataMode(SPI_MODE0);
     // VSPI = CS:  5, CLK: 18, MOSI: 23, MISO: 19
     slave.begin(VSPI);
     // clear buffers
     memset(spi_slave_tx_buf, 0, BUFFER_SIZE);
     memset(spi_slave_rx_buf, 0, BUFFER_SIZE);
+
+    // Connect to wifi
     WiFi.begin(ssid, pwd);
     Serial.println("Connecting");
     while (WiFi.status() != WL_CONNECTED)
@@ -177,10 +185,9 @@ void setup()
     Serial.print("Connected to WiFi network with IP Address: ");
     Serial.println(WiFi.localIP());
     delay(2000);
-    // TODO: GET ID FROM SERVER INSTEAD OF JUST SETTING IT HERE
-    // Serial.println("Getting ID from the server");
+
     //  Initialize Json Variables
-    telemetryJson["id"] = 1;
+    telemetryJson["id"] = -1;
     telemetryJson["position"]["x"] = 0;
     telemetryJson["position"]["y"] = 0;
     telemetryJson["gyroscope"]["x"] = 0;
@@ -191,6 +198,11 @@ void setup()
     telemetryJson["accelerometer"]["z"] = 0;
     telemetryJson["steps"] = 0;
     telemetryJson["state"] = "stop";
+
+    Serial.println("Getting ID from the server");
+    ServerRequest(telemetry_add, "");
+    Serial.print("ID: ");
+    serializeJson(telemetryJson["id"],Serial);
     
     // Initialize motor pins
     pinMode(motorLeftStepPin, OUTPUT);
@@ -207,10 +219,10 @@ void setup()
 
 void loop()
 {
-    // if there is no transaction in queue, add transaction
-    if (slave.remained() == 0)
+    // if there is no SPI transaction in queue, add transaction
+    if (slave.remained() == 0){
         slave.queue(spi_slave_rx_buf, spi_slave_tx_buf, BUFFER_SIZE);
-
+    }
     while (slave.available())
     {
         // read spi data from buffer
@@ -222,21 +234,34 @@ void loop()
         spi_data_flag = true;
         slave.pop();
     }
-
+    // Handle SPI data
     if (spi_data_flag)
     {
         Serial.println(data);
         spi_data_flag = false;
     }
 
+    // State machine
     if (state != STOP)
     {
-        // Movement code here
+        navigate();
+        moveMotors();
     }
-    navigate();
+    
+    // Send telemetry data to server
+    ServerRequest(telemetry_update, "");
 }
 
-String httpPOSTRequest(const char *url, const String payload)
+void moveMotors(){
+    motorLeft.move(stepsL);
+    motorRight.move(-stepsR);
+    while(motorLeft.distanceToGo() != 0 || motorRight.distanceToGo() != 0){
+        motorLeft.run();
+        motorRight.run();
+    }
+}
+
+char* httpPOSTRequest(const char *url, char* payload)
 {
     WiFiClient client;
     HTTPClient http;
@@ -251,36 +276,51 @@ String httpPOSTRequest(const char *url, const String payload)
         String resp = http.getString();
         if (resp != "")
         {
-            Serial.println(resp);
+            // Convert the string to a char pointer
+            char *rsp_char = &resp[0];
+            Serial.println(rsp_char);
             http.end();
-            return resp;
+            return rsp_char;
         }
     }
     else
     {
         Serial.print(responseCode);
         Serial.println(" [ERROR]");
-        http.end();
-        return "";
     }
+    http.end();
+    return "";
 }
 
-String ServerRequest(Endpoint endpoint, const char *payload)
+char* ServerRequest(Endpoint endpoint, char *payload)
 {
     switch (endpoint)
     {
     case telemetry_update:
     {
-        String json;
+        char json[128];
         serializeJson(telemetryJson, json);
-        json = httpPOSTRequest(SERVER_API_BASE TELEMETRY_ENDPOINT, json);
+        char* resp;
+        resp = httpPOSTRequest(SERVER_API_BASE TELEMETRY_ENDPOINT, json);
         if (json == "")
             return "";
-        deserializeJson(commandJson, json); // There will be a command embedded in the response if there is a new command
+        deserializeJson(commandJson, resp); // There will be a command embedded in the response if there is a new command
         state = commandJson["state"];
         return json;
     }
     break;
+    case telemetry_add:
+    {
+        char json[128];
+        serializeJson(telemetryJson, json);
+        char* resp;
+        resp = httpPOSTRequest(SERVER_API_BASE TELEMETRY_ENDPOINT, json);
+        if (json == "")
+            return "";
+        deserializeJson(commandJson, resp); // In this case the command is the rover's ID (just reusing commandjson to save on memory)
+        telemetryJson["id"] = commandJson["id"];
+        return json;
+    }
     case map_add:
         return httpPOSTRequest(SERVER_API_BASE MAP_ADD_ENDPOINT, payload);
         break;
@@ -302,9 +342,9 @@ void AddNode()
     doc["x"] = position.x;
     doc["y"] = position.y;
     doc["map_id"] = 1;
-    String json;
+    char json[128]; 
     serializeJson(doc, json);
-    int nodeId = ServerRequest(node_add, json.c_str()).toInt();
+    int nodeId = std::stoi(ServerRequest(node_add, json)); //Node ID should be the response
 
     // Connect the new node to the previous node
     if (nodeId != -1)
@@ -315,7 +355,7 @@ void AddNode()
         doc["target_node_id"] = nodeId;
         doc["weight"] = stepsSinceLastNode;
         serializeJson(doc, json);
-        ServerRequest(edge_add, json.c_str());
+        ServerRequest(edge_add, json);
     }
     stepsSinceLastNode = 0;
 }
